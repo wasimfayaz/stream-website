@@ -851,45 +851,26 @@ function App() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <button 
-            onClick={triggerFlirt} 
-            className="btn-action-sync btn-flirt" 
-            style={{ 
-              background: 'rgba(245, 158, 11, 0.15)', 
-              borderColor: 'rgba(245, 158, 11, 0.3)', 
-              color: '#fef3c7',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              borderRadius: '9999px',
-              padding: '0.45rem 1rem',
-              fontSize: '0.8rem',
-              fontWeight: '600',
-              animation: 'heartBeat 2.5s infinite'
-            }}
-          >
-            <Heart size={13} fill="var(--primary)" color="var(--primary)" />
-            <span>Flirt with Baby</span>
-          </button>
-
-          <button 
-            onClick={leaveRoom} 
-            className="btn-action-sync btn-leave" 
-            style={{ 
-              background: 'rgba(244, 63, 94, 0.15)', 
-              borderColor: 'rgba(244, 63, 94, 0.3)', 
-              color: '#fecaca',
-              borderRadius: '9999px',
-              padding: '0.45rem 1rem',
-              fontSize: '0.8rem',
-              fontWeight: '600'
-            }}
-          >
-            <span>Leave</span>
-          </button>
+          {joinedRoom && (
+            <button 
+              onClick={leaveRoom} 
+              className="btn-action-sync btn-leave" 
+              style={{ 
+                background: 'rgba(244, 63, 94, 0.15)', 
+                borderColor: 'rgba(244, 63, 94, 0.3)', 
+                color: '#fecaca',
+                borderRadius: '9999px',
+                padding: '0.45rem 1rem',
+                fontSize: '0.8rem',
+                fontWeight: '600'
+              }}
+            >
+              <span>Leave Room</span>
+            </button>
+          )}
           
           <div className="user-status-pill" style={{ padding: '0.4rem 0.85rem', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <div className="status-dot"></div>
+            <div className="status dot" style={{ backgroundColor: joinedRoom ? 'var(--primary)' : 'var(--text-muted)' }}></div>
             <span style={{ fontSize: '0.8rem' }}><strong>Edilyn ❤️ Wasim</strong></span>
           </div>
         </div>
@@ -909,12 +890,7 @@ function App() {
               <span className="fullscreen-btn-text">Fullscreen</span>
             </button>
 
-            {/* Synchronized Flirt Toast overlay on top of video / inside fullscreen */}
-            {flirtyQuote && (
-              <div className="video-flirt-overlay">
-                {flirtyQuote}
-              </div>
-            )}
+
 
             {currentVideo.isIframe ? (
               <>
@@ -1201,51 +1177,14 @@ function App() {
             )}
 
             {activeTab === 'movies' && (
-              <div className="free-movies-container">
-                {/* Cinematic Hero Spotlight Section (matching Screenshot 1) */}
-                {featuredMovie && (
-                  <div className="hero-spotlight-card" style={{ backgroundImage: `url(${featuredMovie.poster})` }}>
-                    <div className="hero-spotlight-overlay">
-                      <div className="hero-spotlight-content">
-                        <h1 className="hero-spotlight-title">{featuredMovie.title}</h1>
-                        <div className="hero-spotlight-meta">
-                          <span className="rating-badge">★ {featuredMovie.rating || '7.5'} <span>/10</span></span>
-                          <span className="meta-item">Year <strong>{featuredMovie.year}</strong></span>
-                          <span className="meta-item">Runtime <strong>{featuredMovie.runtime || '115 min'}</strong></span>
-                          <span className="meta-item">Type <strong>Movie</strong></span>
-                          <span className="genre-pill">{featuredMovie.genre}</span>
-                        </div>
-                        <p className="hero-spotlight-overview">{featuredMovie.overview}</p>
-                        
-                        <div className="hero-spotlight-actions">
-                          <button className="btn-hero-watch" onClick={() => playFreeMovie(featuredMovie)}>
-                            <Play size={16} fill="black" />
-                            <span>Watch now</span>
-                          </button>
-                          <button className="btn-hero-surprise" onClick={handleSurpriseMe}>
-                            <RefreshCw size={16} />
-                            <span>Surprise me</span>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Discover Header (matching Screenshot 2) */}
-                <div className="discover-header">
-                  <span className="discover-subtitle">Discover</span>
-                  <h2 className="discover-title">Find something to watch</h2>
-                  <p className="discover-desc">Mix and match — by genre, search any movie globally, or let us pick a surprise.</p>
-                </div>
-
+              <div className="free-movies-container" style={{ padding: '1.5rem 0' }}>
                 <form onSubmit={handleMovieSearch} className="custom-source-form" style={{ marginBottom: '1.5rem' }}>
                   <div className="input-row">
                     <input 
                       type="text" 
                       placeholder="Search any movie globally (e.g. A Walk to Remember, Titanic)..." 
                       className="form-input"
-                      style={{ paddingLeft: '1rem' }}
+                      style={{ paddingLeft: '1.5rem' }}
                       value={freeMovieQuery}
                       onChange={(e) => setFreeMovieQuery(e.target.value)}
                     />
@@ -1255,31 +1194,12 @@ function App() {
                   </div>
                 </form>
 
-                {/* Genre chips filter bar */}
-                <div className="genre-chips-container">
-                  {GENRES.map(genre => (
-                    <button 
-                      key={genre}
-                      className={`genre-chip ${selectedGenre === genre && freeSearchResults.length === 0 ? 'active' : ''}`}
-                      onClick={() => {
-                        setSelectedGenre(genre);
-                        setFreeSearchResults([]);
-                      }}
-                    >
-                      {genre}
-                    </button>
-                  ))}
-                  <button className="genre-chip surprise-chip" onClick={handleSurpriseMe}>
-                    🎲 Surprise me
-                  </button>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {freeSearchResults.length > 0 ? `Search Results for "${freeMovieQuery}"` : `${selectedGenre} Movies`}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+                  <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                    {freeSearchResults.length > 0 ? `Search Results for "${freeMovieQuery}"` : 'Direct Movie Search'}
                   </span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Server:</label>
+                    <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Streaming Server:</label>
                     <select 
                       value={selectedServer}
                       onChange={(e) => switchServer(e.target.value)}
@@ -1292,38 +1212,40 @@ function App() {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.25)', padding: '0.6rem 0.85rem', borderRadius: 'var(--radius-sm)', color: '#fef3c7', fontSize: '0.825rem', marginBottom: '1.25rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.25)', padding: '0.6rem 0.85rem', borderRadius: 'var(--radius-sm)', color: '#fef3c7', fontSize: '0.825rem', marginBottom: '1.5rem' }}>
                   <Volume2 size={18} color="var(--primary)" style={{ flexShrink: 0 }} />
                   <span><strong>Audio & Language Options:</strong> You can select <strong>English Audio</strong> inside the player by clicking the <strong>⚙️ Settings Gear</strong> or <strong>💬 Audio/CC Icon</strong> in the bottom right corner of the video screen!</span>
                 </div>
 
-                <div className="movies-grid">
-                  {(freeSearchResults.length > 0 
-                    ? freeSearchResults 
-                    : (selectedGenre === 'All' 
-                      ? DIVERSE_CATALOG 
-                      : DIVERSE_CATALOG.filter(m => m.genre === selectedGenre))
-                  ).map(movie => (
-                    <div 
-                      key={movie.id} 
-                      className="movie-thumbnail-card"
-                      onClick={() => {
-                        setFeaturedMovie(movie);
-                        playFreeMovie(movie);
-                      }}
-                    >
-                      <span className="movie-card-badge">★ {movie.rating || '7.5'}</span>
-                      <img 
-                        src={movie.poster_path ? (movie.poster_path.startsWith('http') ? movie.poster_path : `https://image.tmdb.org/t/p/w500${movie.poster_path}`) : movie.poster} 
-                        alt={movie.title} 
-                      />
-                      <div className="movie-thumbnail-overlay">
-                        <div className="movie-thumbnail-title">{movie.title}</div>
-                        <div className="movie-thumbnail-meta">{movie.year} • {movie.genre || 'Movie'}</div>
+                {freeSearchResults.length > 0 ? (
+                  <div className="movies-grid">
+                    {freeSearchResults.map(movie => (
+                      <div 
+                        key={movie.id} 
+                        className="movie-thumbnail-card"
+                        onClick={() => {
+                          setFeaturedMovie(movie);
+                          playFreeMovie(movie);
+                        }}
+                      >
+                        <span className="movie-card-badge">★ {movie.rating || '7.5'}</span>
+                        <img 
+                          src={movie.poster_path ? (movie.poster_path.startsWith('http') ? movie.poster_path : `https://image.tmdb.org/t/p/w500${movie.poster_path}`) : movie.poster} 
+                          alt={movie.title} 
+                        />
+                        <div className="movie-thumbnail-overlay">
+                          <div className="movie-thumbnail-title">{movie.title}</div>
+                          <div className="movie-thumbnail-meta">{movie.year} • {movie.genre || 'Movie'}</div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'rgba(255, 255, 255, 0.01)', border: '1px dashed rgba(255, 255, 255, 0.06)', borderRadius: 'var(--radius-lg)' }}>
+                    <Search size={36} style={{ color: 'var(--primary)', marginBottom: '1rem', opacity: 0.7 }} fill="none" />
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>Search for any movie globally above to start streaming instantly!</p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -1524,35 +1446,7 @@ function App() {
         </div>
       </div>
       
-      {flirtyQuote && (
-        <div style={{
-          position: 'fixed',
-          bottom: '24px',
-          left: '24px',
-          zIndex: 9999,
-          background: 'rgba(14, 165, 233, 0.15)',
-          backdropFilter: 'blur(16px)',
-          border: '1px solid rgba(14, 165, 233, 0.3)',
-          boxShadow: '0 8px 32px 0 rgba(14, 165, 233, 0.2)',
-          borderRadius: 'var(--radius-md)',
-          padding: '1rem 1.5rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem',
-          color: 'white',
-          animation: 'slideUpFade 0.5s ease-out',
-          maxWidth: '320px'
-        }}>
-          <div style={{
-            fontSize: '1.75rem',
-            animation: 'heartBeat 1.2s infinite'
-          }}>❤️</div>
-          <div>
-            <div style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--primary)', fontWeight: 'bold' }}>Wasim & Edilyn</div>
-            <div style={{ fontSize: '0.95rem', marginTop: '0.2rem', lineHeight: '1.4', fontWeight: '500' }}>{flirtyQuote}</div>
-          </div>
-        </div>
-      )}
+
     </>
   );
 }
