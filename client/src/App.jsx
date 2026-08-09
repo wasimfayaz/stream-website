@@ -1122,7 +1122,7 @@ function App() {
                 className={`tab-btn ${activeTab === 'local' ? 'active' : ''}`}
                 onClick={() => setActiveTab('local')}
               >
-                Local Sync File
+                Upload & Stream File
               </button>
               <button 
                 className={`tab-btn ${activeTab === 'custom' ? 'active' : ''}`}
@@ -1221,8 +1221,7 @@ function App() {
             {activeTab === 'local' && (
               <div>
                 <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-                  Have a movie file downloaded on your computer? Select it below to stream it directly from your machine!
-                  The file will be instantly uploaded to your local server, allowing your partner to stream the video directly from your computer in real-time.
+                  <strong>Standard Mode:</strong> Just Drag & Drop a movie file here! It will upload to the server and stream directly to your partner in real-time while you watch together (just like before).
                 </p>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.25rem', padding: '0.75rem', background: 'rgba(255,255,255,0.03)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-light)' }}>
@@ -1234,9 +1233,9 @@ function App() {
                     style={{ width: '16px', height: '16px', accentColor: 'var(--primary)', cursor: 'pointer' }}
                   />
                   <label htmlFor="sync-p2p" style={{ fontSize: '0.9rem', cursor: 'pointer', userSelect: 'none' }}>
-                    <strong>Sync locally downloaded copies (Skip Upload / Instant play)</strong>
+                    <strong>Offline P2P Mode (ONLY if you BOTH already downloaded the file)</strong>
                     <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.1rem' }}>
-                      Recommended! Both select your copy of the file on your respective devices. Zero waiting, zero upload buffering.
+                      Check this box ONLY if you already sent her the file via WhatsApp/Drive. Skips the upload phase!
                     </span>
                   </label>
                 </div>
