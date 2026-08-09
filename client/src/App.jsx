@@ -17,7 +17,8 @@ import {
   Copy,
   Link,
   RefreshCw,
-  Trash2
+  Trash2,
+  Heart
 } from 'lucide-react';
 
 const SOCKET_URL = import.meta.env.VITE_WS_URL || (import.meta.env.DEV ? 'http://localhost:5000' : window.location.origin);
@@ -62,6 +63,22 @@ const DEFAULT_MOVIES = [
 
 const REACTIONS = ['❤️', '😂', '😮', '🔥', '🍿', '😢'];
 
+const FLIRTY_QUOTES = [
+  "Mahal na mahal kita, Baby! ❤️",
+  "Ikaw lang ang aking bituin, Edilyn. ✨",
+  "Baby, ang ganda-ganda mo naman ngayon! 😍",
+  "Kahit malayo tayo, ikaw pa rin ang tibok ng puso ko, aking Baby. 💓",
+  "Napakaswerte ni Wasim sa'yo, Baby ko. 💕",
+  "Walang distansya ang makakahadlang sa pagmamahal natin, Edilyn. 🌍💞",
+  "Miss na miss na kita, Baby. Sobra! 😘",
+  "Ikaw ang aking paboritong sine at habambuhay na makakasama. 🎬❤️",
+  "Wasim ❤️ Edilyn forever and ever!",
+  "Baby, ikaw ang pinakamagandang nangyari sa buhay ko. 💖",
+  "Ang tibok ng puso ko ay para lang sa'yo, Baby Edilyn. 💗",
+  "Bawat segundo kasama ka ay walang katumbas, Baby. 🥰",
+  "Baby, gusto ko habambuhay tayong magkasama manood ng sine. 💑🍿"
+];
+
 function App() {
   // Lobby States
   const [roomIdInput, setRoomIdInput] = useState('');
@@ -86,6 +103,7 @@ function App() {
   const [isUploading, setIsUploading] = useState(false);
   const [partnerUpload, setPartnerUpload] = useState(null);
   const [syncP2PMode, setSyncP2PMode] = useState(false);
+  const [flirtyQuote, setFlirtyQuote] = useState('');
   
   // Custom Player States
   const [isPlaying, setIsPlaying] = useState(false);
@@ -300,6 +318,40 @@ function App() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Timed flirty quote trigger for Edilyn and Wasim
+  useEffect(() => {
+    if (joinedRoom) {
+      const showRandomQuote = () => {
+        const randomIndex = Math.floor(Math.random() * FLIRTY_QUOTES.length);
+        setFlirtyQuote(FLIRTY_QUOTES[randomIndex]);
+        
+        // Auto-dismiss after 7 seconds
+        setTimeout(() => {
+          setFlirtyQuote('');
+        }, 7000);
+      };
+      
+      // Trigger first one after 30 seconds
+      const initialTimer = setTimeout(showRandomQuote, 30000);
+      
+      // Interval for every 150 seconds
+      const interval = setInterval(showRandomQuote, 150000);
+      
+      return () => {
+        clearTimeout(initialTimer);
+        clearInterval(interval);
+      };
+    }
+  }, [joinedRoom]);
+
+  const triggerFlirt = () => {
+    const randomIndex = Math.floor(Math.random() * FLIRTY_QUOTES.length);
+    setFlirtyQuote(FLIRTY_QUOTES[randomIndex]);
+    setTimeout(() => {
+      setFlirtyQuote('');
+    }, 7000);
+  };
 
   // Create room helper
   const handleCreateRoom = (e) => {
@@ -632,8 +684,8 @@ function App() {
     return (
       <div className="lobby-container">
         <div className="lobby-hero">
-          <h1>Watch Movies <span>Together</span> In Real-Time</h1>
-          <p>Create a private theater for you and your girlfriend. Synchronized playback, reactions, and chat make you feel like you are sitting on the same couch, no matter the distance.</p>
+          <h1>Wasim & Edilyn's <span>Cozy Theater</span></h1>
+          <p>Our private space to watch movies together, no matter the distance. Chat, send reactions, and stay close to each other. Mahal kita, Baby! ❤️</p>
         </div>
 
         <div className="lobby-cards-grid">
@@ -650,14 +702,17 @@ function App() {
                 <label>Your Username</label>
                 <div className="input-wrapper">
                   <span className="input-icon">👤</span>
-                  <input 
-                    type="text" 
-                    placeholder="Enter your name..." 
+                  <select 
                     className="form-input"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required
-                  />
+                    style={{ paddingLeft: '2.5rem', background: '#120e1c', color: 'white', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-md)' }}
+                  >
+                    <option value="" disabled>Select who is joining...</option>
+                    <option value="Wasim">Wasim (Baby)</option>
+                    <option value="Edilyn">Edilyn (Baby)</option>
+                  </select>
                 </div>
               </div>
               <button type="submit" className="btn-primary">
@@ -679,14 +734,17 @@ function App() {
                 <label>Your Username</label>
                 <div className="input-wrapper">
                   <span className="input-icon">👤</span>
-                  <input 
-                    type="text" 
-                    placeholder="Enter your name..." 
+                  <select 
                     className="form-input"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required
-                  />
+                    style={{ paddingLeft: '2.5rem', background: '#120e1c', color: 'white', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-md)' }}
+                  >
+                    <option value="" disabled>Select who is joining...</option>
+                    <option value="Wasim">Wasim (Baby)</option>
+                    <option value="Edilyn">Edilyn (Baby)</option>
+                  </select>
                 </div>
               </div>
               <div className="form-group">
@@ -717,14 +775,30 @@ function App() {
     <>
       <header className="app-header">
         <a href="/" className="brand" onClick={(e) => { e.preventDefault(); leaveRoom(); }}>
-          <div className="brand-icon">
+          <div className="brand-icon" style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)' }}>
             <Tv size={22} color="white" />
           </div>
           <div className="brand-name">
-            Streaam<span>Sync</span>
+            Baby<span>Sync</span>
           </div>
         </a>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <button 
+            onClick={triggerFlirt} 
+            className="btn-action-sync" 
+            style={{ 
+              background: 'rgba(14, 165, 233, 0.15)', 
+              borderColor: 'rgba(14, 165, 233, 0.3)', 
+              color: '#e0f2fe',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              animation: 'heartBeat 2.5s infinite'
+            }}
+          >
+            <Heart size={14} fill="var(--primary)" color="var(--primary)" />
+            <span>Flirt with Baby</span>
+          </button>
           <button onClick={leaveRoom} className="btn-action-sync" style={{ background: 'rgba(239, 68, 110, 0.15)', borderColor: 'rgba(239, 68, 110, 0.3)', color: '#fecaca' }}>
             Leave Room
           </button>
@@ -1103,6 +1177,36 @@ function App() {
           </form>
         </div>
       </div>
+      
+      {flirtyQuote && (
+        <div style={{
+          position: 'fixed',
+          bottom: '24px',
+          left: '24px',
+          zIndex: 9999,
+          background: 'rgba(14, 165, 233, 0.15)',
+          backdropFilter: 'blur(16px)',
+          border: '1px solid rgba(14, 165, 233, 0.3)',
+          boxShadow: '0 8px 32px 0 rgba(14, 165, 233, 0.2)',
+          borderRadius: 'var(--radius-md)',
+          padding: '1rem 1.5rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1rem',
+          color: 'white',
+          animation: 'slideUpFade 0.5s ease-out',
+          maxWidth: '320px'
+        }}>
+          <div style={{
+            fontSize: '1.75rem',
+            animation: 'heartBeat 1.2s infinite'
+          }}>❤️</div>
+          <div>
+            <div style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--primary)', fontWeight: 'bold' }}>Wasim & Edilyn</div>
+            <div style={{ fontSize: '0.95rem', marginTop: '0.2rem', lineHeight: '1.4', fontWeight: '500' }}>{flirtyQuote}</div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
