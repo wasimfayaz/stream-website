@@ -36,25 +36,32 @@ const MOVIE_SERVERS = [
   { id: 'autoembed', name: 'Server 6 (AutoEmbed - Forced English)', getUrl: (imdbId) => `https://player.autoembed.cc/embed/movie/${imdbId}?lang=en` }
 ];
 
-const POPULAR_MOVIES = [
-  { id: 'tt0251127', title: 'How to Lose a Guy in 10 Days', year: '2003', poster: 'https://m.media-amazon.com/images/M/MV5BMjE4NTA1NzExN15BMl5BanBnXkFtZTYwNjc3MjM3._V1_QL75_UY562_CR0,0,380,562_.jpg', overview: 'Ben bets his coworkers that he can make a woman fall in love with him in 10 days. But along comes Andie, a writer with her own agenda.' },
-  { id: 'tt0120338', title: 'Titanic', year: '1997', poster: 'https://image.tmdb.org/t/p/w500/9cqN121KmBkWi828D8RStfiHWTo.jpg', overview: 'A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.' },
-  { id: 'tt0332280', title: 'The Notebook', year: '2004', poster: 'https://image.tmdb.org/t/p/w500/rNzQIGRG81KScujVJme2cTSu2.jpg', overview: 'An epic love story centered around an older man who reads aloud to an older woman in a nursing home.' },
-  { id: 'tt3783958', title: 'La La Land', year: '2016', poster: 'https://image.tmdb.org/t/p/w500/uDO8zWDhfWwo1ikxsRFAZWVvMxs.jpg', overview: 'While navigating their careers in Los Angeles, a pianist and an actress fall in love while attempting to reconcile their aspirations.' },
-  { id: 'tt1375666', title: 'Inception', year: '2010', poster: 'https://image.tmdb.org/t/p/w500/oYuLEW9W2vBBGLBocqZXi12xIQp.jpg', overview: 'A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea.' },
-  { id: 'tt0499549', title: 'Avatar', year: '2009', poster: 'https://image.tmdb.org/t/p/w500/kyeqWdyUXW608qlYkRqosgbbJyK.jpg', overview: 'A paraplegic Marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home.' },
-  { id: 'tt0816692', title: 'Interstellar', year: '2014', poster: 'https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg', overview: 'The adventures of a group of explorers who make use of a newly discovered wormhole to surpass the limitations on human space travel.' },
-  { id: 'tt4154756', title: 'Avengers: Infinity War', year: '2018', poster: 'https://image.tmdb.org/t/p/w500/7WsyChLLEzFiDOVTGfaZaE3zRBV.jpg', overview: 'The Avengers and their allies must be willing to sacrifice all in an attempt to defeat the powerful Thanos.' },
-  { id: 'tt0137523', title: 'Fight Club', year: '1999', poster: 'https://image.tmdb.org/t/p/w500/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg', overview: 'An insomniac office worker and a devil-may-care soap maker form an underground fight club.' }
-];
+const GENRES = ['All', 'Romance', 'Action', 'Comedy', 'Drama', 'Sci-Fi', '🇵🇭 Filipino'];
 
-const FILIPINO_MOVIES = [
-  { id: 'tt10249826', title: 'Hello, Love, Goodbye', year: '2019', poster: 'https://m.media-amazon.com/images/M/MV5BNzllMjY5NmItYTI2My00OWUxLWIyY2EtYTgzNzJiYzA2ZjUxXkEyXkFqcGc@._V1_SX300.jpg', overview: 'A nursing graduate working as a domestic helper in Hong Kong meets a bartender, and they navigate love and ambition.' },
-  { id: 'tt30222384', title: 'Rewind', year: '2023', poster: 'https://m.media-amazon.com/images/M/MV5BMDYwYWY0OTUtYTQ1MC00ODhjLWIwOGQtMDMzNzVhYjJhZjRhXkEyXkFqcGc@._V1_SX300.jpg', overview: 'John gets a chance to turn back time and save his wife Mary after a tragic accident.' },
-  { id: 'tt8887680', title: 'The Hows of Us', year: '2018', poster: 'https://m.media-amazon.com/images/M/MV5BOGZmNzc1ZjQtMDgzMS00Y2FlLWIxODktYzZlMzY5MjliYjRjXkEyXkFqcGc@._V1_SX300.jpg', overview: 'A young couple struggles to keep their relationship alive while building their dream house together.' },
-  { id: 'tt2950944', title: 'Four Sisters and a Wedding', year: '2013', poster: 'https://m.media-amazon.com/images/M/MV5BNTIzMTQ2NDEtMWJjMS00NDVhLWIyYzQtNTJkZDc4ZTIwMjgwXkEyXkFqcGc@._V1_SX300.jpg', overview: 'Four sisters try to stop their younger brother’s upcoming wedding.' },
-  { id: 'tt4179374', title: 'That Thing Called Tadhana', year: '2014', poster: 'https://m.media-amazon.com/images/M/MV5BMTgzMjM3MTA2Ml5BMl5BanBnXkFtZTgwNTU5MTY4NDE@._V1_SX300.jpg', overview: 'Two strangers meet at an airport and embark on a romantic road trip across Sagada.' },
-  { id: 'tt5214040', title: 'A Second Chance', year: '2015', poster: 'https://m.media-amazon.com/images/M/MV5BMjA5OTgxMDcyNV5BMl5BanBnXkFtZTgwMTQ3Mzk2NzE@._V1_SX300.jpg', overview: 'Popoy and Basha face the realities of marriage after their fairytale romance.' }
+const DIVERSE_CATALOG = [
+  { id: 'tt0251127', title: 'How to Lose a Guy in 10 Days', year: '2003', rating: '6.6', runtime: '116 min', genre: 'Romance', poster: 'https://m.media-amazon.com/images/M/MV5BMjE4NTA1NzExN15BMl5BanBnXkFtZTYwNjc3MjM3._V1_SX300.jpg', overview: 'Ben bets his coworkers that he can make a woman fall in love with him in 10 days. But along comes Andie, a writer with her own agenda.' },
+  { id: 'tt0281358', title: 'A Walk to Remember', year: '2002', rating: '7.3', runtime: '102 min', genre: 'Romance', poster: 'https://m.media-amazon.com/images/M/MV5BMzVjMGVlOTYtMzM4Mi00NjFmLWE4NWUtYWZjM2Y1MDFlNDk2XkEyXkFqcGc@._V1_SX300.jpg', overview: 'Two North Carolina teens, Landon Carter and Jamie Sullivan, are thrown together after Landon gets into trouble and is sentenced to perform community service.' },
+  { id: 'tt0332280', title: 'The Notebook', year: '2004', rating: '7.8', runtime: '123 min', genre: 'Romance', poster: 'https://m.media-amazon.com/images/M/MV5BMTgxMDM4NTM0NV5BMl5BanBnXkFtZTcwNjcxOTU3Ng@@._V1_SX300.jpg', overview: 'An epic love story centered around an older man who reads aloud to an older woman in a nursing home about a young couple’s romance.' },
+  { id: 'tt3783958', title: 'La La Land', year: '2016', rating: '8.0', runtime: '128 min', genre: 'Romance', poster: 'https://m.media-amazon.com/images/M/MV5BMzUzNDM2NzM2MV5BMl5BanBnXkFtZTgwNTM3NTg4OTE@._V1_SX300.jpg', overview: 'While navigating their careers in Los Angeles, a pianist and an actress fall in love while attempting to reconcile their aspirations.' },
+  { id: 'tt0120338', title: 'Titanic', year: '1997', rating: '7.9', runtime: '194 min', genre: 'Romance', poster: 'https://m.media-amazon.com/images/M/MV5BYzYyN2FiZmItY2U3Ny00NWVmLWI5OWEtYmUxNWMyN2IxZDY3XkEyXkFqcGc@._V1_SX300.jpg', overview: 'A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.' },
+  { id: 'tt1431045', title: 'Deadpool', year: '2016', rating: '8.0', runtime: '108 min', genre: 'Action', poster: 'https://m.media-amazon.com/images/M/MV5BYzE5MjY1ZDgtMTkyNC00MTMyLThhMjAtZGI5OTE1NzFlZGJjXkEyXkFqcGc@._V1_SX300.jpg', overview: 'A wisecracking mercenary gets experimented on and becomes immortal but ugly, and sets out to track down the man who ruined his looks.' },
+  { id: 'tt4154756', title: 'Avengers: Infinity War', year: '2018', rating: '8.4', runtime: '149 min', genre: 'Action', poster: 'https://m.media-amazon.com/images/M/MV5BMjMxNjY2MDU1OV5BMl5BanBnXkFtZTgwNzY1MTUwNTM@._V1_SX300.jpg', overview: 'The Avengers and their allies must be willing to sacrifice all in an attempt to defeat the powerful Thanos before his blitz puts an end to the universe.' },
+  { id: 'tt1877830', title: 'The Batman', year: '2022', rating: '7.8', runtime: '176 min', genre: 'Action', poster: 'https://m.media-amazon.com/images/M/MV5BMDdmMTBiNTktHY5Ny00N2NmLTgwYzgtMDhjZmFhNjAxM2M3XkEyXkFqcGc@._V1_SX300.jpg', overview: 'When a sadistic serial killer begins murdering key political figures in Gotham, Batman is forced to investigate the city’s hidden corruption.' },
+  { id: 'tt1375666', title: 'Inception', year: '2010', rating: '8.8', runtime: '148 min', genre: 'Sci-Fi', poster: 'https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg', overview: 'A thief who steals corporate secrets through dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.' },
+  { id: 'tt0816692', title: 'Interstellar', year: '2014', rating: '8.7', runtime: '169 min', genre: 'Sci-Fi', poster: 'https://m.media-amazon.com/images/M/MV5BYzdjMDAxZGItMjI2My00ODA1LTlkNzItOWFjMDU5ZDJlYWY3XkEyXkFqcGc@._V1_SX300.jpg', overview: 'When Earth becomes uninhabitable, a team of ex-NASA researchers travels through a wormhole to find a new home for humanity.' },
+  { id: 'tt0499549', title: 'Avatar', year: '2009', rating: '7.9', runtime: '162 min', genre: 'Sci-Fi', poster: 'https://m.media-amazon.com/images/M/MV5BMjE8Mjk3MDU2N15BMl5BanBnXkFtZTcwNzExMTU5MjE@._V1_SX300.jpg', overview: 'A paraplegic Marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting his new home.' },
+  { id: 'tt1630029', title: 'Avatar: The Way of Water', year: '2022', rating: '7.6', runtime: '192 min', genre: 'Sci-Fi', poster: 'https://m.media-amazon.com/images/M/MV5BYjhiNjBlODctN2ZiOC00YjVlLWFiNzAtNDJhMzg3ZmVjYzA1XkEyXkFqcGc@._V1_SX300.jpg', overview: 'Jake Sully lives with his family formed on the planet of Pandora. Once a familiar threat returns, Jake must work with Neytiri and the army of the Na\'vi.' },
+  { id: 'tt6791096', title: 'Bohemian Rhapsody', year: '2018', rating: '7.9', runtime: '134 min', genre: 'Drama', poster: 'https://m.media-amazon.com/images/M/MV5BMTA2NDc3Njg5NDVeQTJeQWpwZ15BbWU4MDc1NDcxNTUz._V1_SX300.jpg', overview: 'The story of the legendary British rock band Queen and lead singer Freddie Mercury, leading up to their famous performance at Live Aid.' },
+  { id: 'tt0137523', title: 'Fight Club', year: '1999', rating: '8.8', runtime: '139 min', genre: 'Drama', poster: 'https://m.media-amazon.com/images/M/MV5BOTgyOGQ1NDItNGU3Ny00MjU3LTg2YWEtN2FjNDZjYzU2MTAzXkEyXkFqcGc@._V1_SX300.jpg', overview: 'An insomniac office worker and a devil-may-care soap maker form an underground fight club that evolves into much more.' },
+  { id: 'tt0111161', title: 'The Shawshank Redemption', year: '1994', rating: '9.3', runtime: '142 min', genre: 'Drama', poster: 'https://m.media-amazon.com/images/M/MV5BMDAyY2FhYjctNDc5OS00MDNlLThiMGUtY2UxYWVkNGY2ZjljXkEyXkFqcGc@._V1_SX300.jpg', overview: 'Over the course of several years, two convicts form a friendship, seeking consolation and eventual redemption through basic compassion.' },
+  { id: 'tt0443706', title: 'The Hangover', year: '2009', rating: '7.7', runtime: '100 min', genre: 'Comedy', poster: 'https://m.media-amazon.com/images/M/MV5BNGQwZjg5NDItY2UxYi00N2E3LTg3ZjAtZjQ5ZmNmZDAxNWNmXkEyXkFqcGc@._V1_SX300.jpg', overview: 'Three buddies wake up from a bachelor party in Las Vegas, with no memory of the previous night and the bachelor missing.' },
+  { id: 'tt0800039', title: 'Superbad', year: '2007', rating: '7.6', runtime: '113 min', genre: 'Comedy', poster: 'https://m.media-amazon.com/images/M/MV5BMTc0NjIyNDExMV5BMl5BanBnXkFtZTcwMjgxMTU1MQ@@._V1_SX300.jpg', overview: 'Two co-dependent high school seniors deal with separation anxiety after their plan to stage a booze-soaked party goes awry.' },
+  { id: 'tt10249826', title: 'Hello, Love, Goodbye', year: '2019', rating: '7.9', runtime: '118 min', genre: '🇵🇭 Filipino', poster: 'https://m.media-amazon.com/images/M/MV5BNzllMjY5NmItYTI2My00OWUxLWIyY2EtYTgzNzJiYzA2ZjUxXkEyXkFqcGc@._V1_SX300.jpg', overview: 'A nursing graduate working as a domestic helper in Hong Kong meets a bartender, and they navigate love and ambition.' },
+  { id: 'tt30222384', title: 'Rewind', year: '2023', rating: '7.8', runtime: '112 min', genre: '🇵🇭 Filipino', poster: 'https://m.media-amazon.com/images/M/MV5BMDYwYWY0OTUtYTQ1MC00ODhjLWIwOGQtMDMzNzVhYjJhZjRhXkEyXkFqcGc@._V1_SX300.jpg', overview: 'John gets a chance to turn back time and save his wife Mary after a tragic accident.' },
+  { id: 'tt8887680', title: 'The Hows of Us', year: '2018', rating: '7.2', runtime: '117 min', genre: '🇵🇭 Filipino', poster: 'https://m.media-amazon.com/images/M/MV5BOGZmNzc1ZjQtMDgzMS00Y2FlLWIxODktYzZlMzY5MjliYjRjXkEyXkFqcGc@._V1_SX300.jpg', overview: 'A young couple struggles to keep their relationship alive while building their dream house together.' },
+  { id: 'tt2950944', title: 'Four Sisters and a Wedding', year: '2013', rating: '7.3', runtime: '125 min', genre: '🇵🇭 Filipino', poster: 'https://m.media-amazon.com/images/M/MV5BNTIzMTQ2NDEtMWJjMS00NDVhLWIyYzQtNTJkZDc4ZTIwMjgwXkEyXkFqcGc@._V1_SX300.jpg', overview: 'Four sisters try to stop their younger brother’s upcoming wedding.' },
+  { id: 'tt4179374', title: 'That Thing Called Tadhana', year: '2014', rating: '7.6', runtime: '111 min', genre: '🇵🇭 Filipino', poster: 'https://m.media-amazon.com/images/M/MV5BMTgzMjM3MTA2Ml5BMl5BanBnXkFtZTgwNTU5MTY4NDE@._V1_SX300.jpg', overview: 'Two strangers meet at an airport and embark on a romantic road trip across Sagada.' },
+  { id: 'tt5214040', title: 'A Second Chance', year: '2015', rating: '7.1', runtime: '130 min', genre: '🇵🇭 Filipino', poster: 'https://m.media-amazon.com/images/M/MV5BMjA5OTgxMDcyNV5BMl5BanBnXkFtZTgwMTQ3Mzk2NzE@._V1_SX300.jpg', overview: 'Popoy and Basha face the realities of marriage after their fairytale romance.' }
 ];
 
 const FLIRTY_QUOTES = [
@@ -98,12 +105,14 @@ function App() {
   const [activeTab, setActiveTab] = useState('movies'); // movies, local, custom
   const [customTitle, setCustomTitle] = useState('');
   const [customUrl, setCustomUrl] = useState('');
+  const [selectedGenre, setSelectedGenre] = useState('All');
+  const [featuredMovie, setFeaturedMovie] = useState(DIVERSE_CATALOG[0]); // How to Lose a Guy in 10 Days
   
   // Free Movie Search States
   const [freeMovieQuery, setFreeMovieQuery] = useState('');
   const [freeSearchResults, setFreeSearchResults] = useState([]);
   const [isSearchingMovies, setIsSearchingMovies] = useState(false);
-  const [selectedServer, setSelectedServer] = useState('vidsrc_me');
+  const [selectedServer, setSelectedServer] = useState('2embed');
   
   // Local File States
   const [localFile, setLocalFile] = useState(null);
@@ -445,9 +454,10 @@ function App() {
 
   const switchServer = (serverId) => {
     setSelectedServer(serverId);
-    if (currentVideo && currentVideo.isIframe && currentVideo.tmdbId) {
+    const targetMovieId = currentVideo ? (currentVideo.imdbId || currentVideo.tmdbId || currentVideo.id?.replace('free-movie-', '')) : null;
+    if (currentVideo && currentVideo.isIframe && targetMovieId) {
       const serverObj = MOVIE_SERVERS.find(s => s.id === serverId) || MOVIE_SERVERS[0];
-      const embedUrl = serverObj.getUrl(currentVideo.tmdbId);
+      const embedUrl = serverObj.getUrl(targetMovieId);
       const videoData = {
         ...currentVideo,
         url: embedUrl,
@@ -459,6 +469,13 @@ function App() {
         socket.emit('video_change', { roomId, video: videoData, username });
       }
     }
+  };
+
+  const handleSurpriseMe = () => {
+    const randomIndex = Math.floor(Math.random() * DIVERSE_CATALOG.length);
+    const randomMovie = DIVERSE_CATALOG[randomIndex];
+    setFeaturedMovie(randomMovie);
+    playFreeMovie(randomMovie);
   };
 
   // Create room helper
@@ -902,45 +919,64 @@ function App() {
 
   return (
     <>
-      <header className="app-header">
-        <div className="header-top-row">
-          <a href="/" className="brand" onClick={(e) => { e.preventDefault(); leaveRoom(); }}>
-            <div className="brand-icon" style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)' }}>
-              <Tv size={22} color="white" />
-            </div>
-            <div className="brand-name">
-              Babies <span>Watch Party</span>
-            </div>
+      <header className="floating-pill-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <a href="/" className="brand" style={{ gap: '0.5rem' }} onClick={(e) => { e.preventDefault(); leaveRoom(); }}>
+            <span style={{ fontSize: '1.25rem', fontWeight: '800', background: 'linear-gradient(135deg, #ffffff 40%, var(--primary) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              M
+            </span>
           </a>
-          <div className="user-status-pill header-pill-mobile">
-            <div className="status-dot"></div>
-            <span>Watching as: <strong>{username}</strong></span>
+          <div className="pill-nav-links">
+            <span className={`pill-nav-link ${activeTab === 'movies' ? 'active' : ''}`} onClick={() => setActiveTab('movies')}>
+              <Film size={14} /> Home
+            </span>
+            <span className={`pill-nav-link ${activeTab === 'movies' ? 'active' : ''}`} onClick={() => setActiveTab('movies')}>Movies</span>
+            <span className={`pill-nav-link ${activeTab === 'local' ? 'active' : ''}`} onClick={() => setActiveTab('local')}>Upload & Stream</span>
+            <span className={`pill-nav-link ${activeTab === 'custom' ? 'active' : ''}`} onClick={() => setActiveTab('custom')}>Custom URL</span>
           </div>
         </div>
 
-        <div className="header-actions">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <button 
             onClick={triggerFlirt} 
             className="btn-action-sync btn-flirt" 
             style={{ 
-              background: 'rgba(14, 165, 233, 0.15)', 
-              borderColor: 'rgba(14, 165, 233, 0.3)', 
-              color: '#e0f2fe',
+              background: 'rgba(245, 158, 11, 0.15)', 
+              borderColor: 'rgba(245, 158, 11, 0.3)', 
+              color: '#fef3c7',
               display: 'flex',
               alignItems: 'center',
               gap: '0.4rem',
+              borderRadius: '9999px',
+              padding: '0.45rem 1rem',
+              fontSize: '0.8rem',
+              fontWeight: '600',
               animation: 'heartBeat 2.5s infinite'
             }}
           >
-            <Heart size={14} fill="var(--primary)" color="var(--primary)" />
-            <span className="flirt-btn-text">Flirt with Baby</span>
+            <Heart size={13} fill="var(--primary)" color="var(--primary)" />
+            <span>Flirt with Baby</span>
           </button>
-          <button onClick={leaveRoom} className="btn-action-sync btn-leave" style={{ background: 'rgba(239, 68, 110, 0.15)', borderColor: 'rgba(239, 68, 110, 0.3)', color: '#fecaca' }}>
-            <span className="leave-btn-text">Leave Room</span>
+
+          <button 
+            onClick={leaveRoom} 
+            className="btn-action-sync btn-leave" 
+            style={{ 
+              background: 'rgba(244, 63, 94, 0.15)', 
+              borderColor: 'rgba(244, 63, 94, 0.3)', 
+              color: '#fecaca',
+              borderRadius: '9999px',
+              padding: '0.45rem 1rem',
+              fontSize: '0.8rem',
+              fontWeight: '600'
+            }}
+          >
+            <span>Leave</span>
           </button>
-          <div className="user-status-pill header-pill-desktop">
+          
+          <div className="user-status-pill" style={{ padding: '0.4rem 0.85rem', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
             <div className="status-dot"></div>
-            <span><span className="watching-prefix">Watching as: </span><strong>{username}</strong></span>
+            <span style={{ fontSize: '0.8rem' }}><strong>Edilyn ❤️ Wasim</strong></span>
           </div>
         </div>
       </header>
@@ -1159,11 +1195,48 @@ function App() {
 
             {activeTab === 'movies' && (
               <div className="free-movies-container">
-                <form onSubmit={handleMovieSearch} className="custom-source-form" style={{ marginBottom: '1.25rem' }}>
+                {/* Cinematic Hero Spotlight Section (matching Screenshot 1) */}
+                {featuredMovie && (
+                  <div className="hero-spotlight-card" style={{ backgroundImage: `url(${featuredMovie.poster})` }}>
+                    <div className="hero-spotlight-overlay">
+                      <div className="hero-spotlight-content">
+                        <h1 className="hero-spotlight-title">{featuredMovie.title}</h1>
+                        <div className="hero-spotlight-meta">
+                          <span className="rating-badge">★ {featuredMovie.rating || '7.5'} <span>/10</span></span>
+                          <span className="meta-item">Year <strong>{featuredMovie.year}</strong></span>
+                          <span className="meta-item">Runtime <strong>{featuredMovie.runtime || '115 min'}</strong></span>
+                          <span className="meta-item">Type <strong>Movie</strong></span>
+                          <span className="genre-pill">{featuredMovie.genre}</span>
+                        </div>
+                        <p className="hero-spotlight-overview">{featuredMovie.overview}</p>
+                        
+                        <div className="hero-spotlight-actions">
+                          <button className="btn-hero-watch" onClick={() => playFreeMovie(featuredMovie)}>
+                            <Play size={16} fill="black" />
+                            <span>Watch now</span>
+                          </button>
+                          <button className="btn-hero-surprise" onClick={handleSurpriseMe}>
+                            <RefreshCw size={16} />
+                            <span>Surprise me</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Discover Header (matching Screenshot 2) */}
+                <div className="discover-header">
+                  <span className="discover-subtitle">Discover</span>
+                  <h2 className="discover-title">Find something to watch</h2>
+                  <p className="discover-desc">Mix and match — by genre, search any movie globally, or let us pick a surprise.</p>
+                </div>
+
+                <form onSubmit={handleMovieSearch} className="custom-source-form" style={{ marginBottom: '1.5rem' }}>
                   <div className="input-row">
                     <input 
                       type="text" 
-                      placeholder="Search any movie (e.g. Titanic, Avatar, Inception)..." 
+                      placeholder="Search any movie globally (e.g. A Walk to Remember, Titanic)..." 
                       className="form-input"
                       style={{ paddingLeft: '1rem' }}
                       value={freeMovieQuery}
@@ -1175,16 +1248,35 @@ function App() {
                   </div>
                 </form>
 
+                {/* Genre chips filter bar */}
+                <div className="genre-chips-container">
+                  {GENRES.map(genre => (
+                    <button 
+                      key={genre}
+                      className={`genre-chip ${selectedGenre === genre && freeSearchResults.length === 0 ? 'active' : ''}`}
+                      onClick={() => {
+                        setSelectedGenre(genre);
+                        setFreeSearchResults([]);
+                      }}
+                    >
+                      {genre}
+                    </button>
+                  ))}
+                  <button className="genre-chip surprise-chip" onClick={handleSurpriseMe}>
+                    🎲 Surprise me
+                  </button>
+                </div>
+
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
                   <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {freeSearchResults.length > 0 ? `Search Results for "${freeMovieQuery}"` : 'Popular Quick Picks'}
+                    {freeSearchResults.length > 0 ? `Search Results for "${freeMovieQuery}"` : `${selectedGenre} Movies`}
                   </span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Server:</label>
                     <select 
                       value={selectedServer}
                       onChange={(e) => switchServer(e.target.value)}
-                      style={{ background: '#0f172a', color: 'white', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-sm)', padding: '0.35rem 0.6rem', fontSize: '0.8rem' }}
+                      style={{ background: '#121214', color: 'white', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-sm)', padding: '0.35rem 0.6rem', fontSize: '0.8rem' }}
                     >
                       {MOVIE_SERVERS.map(s => (
                         <option key={s.id} value={s.id}>{s.name}</option>
@@ -1193,58 +1285,38 @@ function App() {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.25)', padding: '0.6rem 0.85rem', borderRadius: 'var(--radius-sm)', color: '#93c5fd', fontSize: '0.825rem', marginBottom: '1.25rem' }}>
-                  <Volume2 size={18} color="#60a5fa" style={{ flexShrink: 0 }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.25)', padding: '0.6rem 0.85rem', borderRadius: 'var(--radius-sm)', color: '#fef3c7', fontSize: '0.825rem', marginBottom: '1.25rem' }}>
+                  <Volume2 size={18} color="var(--primary)" style={{ flexShrink: 0 }} />
                   <span><strong>Audio & Language Options:</strong> You can select <strong>English Audio</strong> inside the player by clicking the <strong>⚙️ Settings Gear</strong> or <strong>💬 Audio/CC Icon</strong> in the bottom right corner of the video screen!</span>
                 </div>
 
                 <div className="movies-grid">
-                  {(freeSearchResults.length > 0 ? freeSearchResults : POPULAR_MOVIES).map(movie => (
+                  {(freeSearchResults.length > 0 
+                    ? freeSearchResults 
+                    : (selectedGenre === 'All' 
+                      ? DIVERSE_CATALOG 
+                      : DIVERSE_CATALOG.filter(m => m.genre === selectedGenre))
+                  ).map(movie => (
                     <div 
                       key={movie.id} 
                       className="movie-thumbnail-card"
-                      onClick={() => playFreeMovie(movie)}
+                      onClick={() => {
+                        setFeaturedMovie(movie);
+                        playFreeMovie(movie);
+                      }}
                     >
+                      <span className="movie-card-badge">★ {movie.rating || '7.5'}</span>
                       <img 
                         src={movie.poster_path ? (movie.poster_path.startsWith('http') ? movie.poster_path : `https://image.tmdb.org/t/p/w500${movie.poster_path}`) : movie.poster} 
                         alt={movie.title} 
                       />
                       <div className="movie-thumbnail-overlay">
                         <div className="movie-thumbnail-title">{movie.title}</div>
-                        <div className="movie-thumbnail-duration">▶ Play Free Stream</div>
+                        <div className="movie-thumbnail-meta">{movie.year} • {movie.genre || 'Movie'}</div>
                       </div>
                     </div>
                   ))}
                 </div>
-
-                {freeSearchResults.length === 0 && (
-                  <>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '2rem', marginBottom: '1rem' }}>
-                      <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--primary)' }}>
-                        🇵🇭 Filipino Favorites (For Edilyn)
-                      </span>
-                    </div>
-
-                    <div className="movies-grid">
-                      {FILIPINO_MOVIES.map(movie => (
-                        <div 
-                          key={movie.id} 
-                          className="movie-thumbnail-card"
-                          onClick={() => playFreeMovie(movie)}
-                        >
-                          <img 
-                            src={movie.poster_path} 
-                            alt={movie.title} 
-                          />
-                          <div className="movie-thumbnail-overlay">
-                            <div className="movie-thumbnail-title">{movie.title}</div>
-                            <div className="movie-thumbnail-duration">▶ Play Stream</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                )}
               </div>
             )}
 
