@@ -645,18 +645,44 @@ function App() {
   // Submit custom url
   const handleCustomUrlSubmit = (e) => {
     e.preventDefault();
-    if (!customUrl.trim() || !customTitle.trim() || !socket) return;
+    if (!customUrl.trim() || !customTitle.trim()) return;
+    
+    let finalUrl = customUrl.trim();
+    let isIframe = false;
+    
+    // YouTube Shorts: https://www.youtube.com/shorts/aB1cDefG23I
+    if (finalUrl.includes('youtube.com/shorts/')) {
+      const shortsId = finalUrl.split('/shorts/')[1]?.split('?')[0]?.split('&')[0];
+      if (shortsId) {
+        finalUrl = `https://www.youtube.com/embed/${shortsId}?autoplay=1`;
+        isIframe = true;
+      }
+    } else {
+      // Standard YouTube: watch?v=... or youtu.be/...
+      const ytRegExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = finalUrl.match(ytRegExp);
+      if (match && match[2].length === 11) {
+        finalUrl = `https://www.youtube.com/embed/${match[2]}?autoplay=1`;
+        isIframe = true;
+      }
+    }
     
     const customMovie = {
       id: 'custom-' + Date.now(),
       title: customTitle.trim(),
-      url: customUrl.trim(),
-      description: 'Streamed from custom URL: ' + customUrl,
+      url: finalUrl,
+      description: 'Streamed from custom URL: ' + finalUrl,
       thumbnail: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=500&auto=format&fit=crop&q=60',
-      isCustom: true
+      isCustom: true,
+      isIframe: isIframe
     };
 
-    socket.emit('video_change', { roomId, video: customMovie, username });
+    setCurrentVideo(customMovie);
+
+    if (socket) {
+      socket.emit('video_change', { roomId, video: customMovie, username });
+    }
+    
     setCustomTitle('');
     setCustomUrl('');
   };
@@ -710,6 +736,19 @@ function App() {
     const objectUrl = URL.createObjectURL(file);
     setLocalFileUrl(objectUrl);
     setHasConfirmedFile(true);
+    
+    // Standalone mode: just load the video file locally and watch it instantly
+    if (!socket || !joinedRoom) {
+      setCurrentVideo({
+        id: 'local-' + Date.now(),
+        title: file.name,
+        url: objectUrl,
+        description: 'Playing local file from storage.',
+        isLocalFile: true
+      });
+      triggerSyncToast('Local video loaded!');
+      return;
+    }
     
     // If syncP2PMode is active OR if the room is currently expecting a local P2P sync file
     if (syncP2PMode || (currentVideo && currentVideo.url === 'p2p-local')) {
@@ -1091,16 +1130,16 @@ function App() {
             </div>
 
             {activeTab === 'watch-together' && !joinedRoom && (
-              <div className="lobby-container" style={{ margin: '1rem auto', padding: '1rem', width: '100%' }}>
+              <div className="lobby-container" style={{ padding: '1rem', width: '100%' }}>
                 <div className="lobby-hero" style={{ textShadow: 'none', marginBottom: '2rem' }}>
-                  <h1 style={{ background: 'linear-gradient(135deg, #ffffff 40%, var(--primary) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontSize: '2.5rem' }}>Watch Together <span>Lobby</span></h1>
+                  <h1 style={{ fontSize: '2.5rem' }}>Watch Together <span>Lobby</span></h1>
                   <p style={{ color: 'var(--text-secondary)' }}>Create or join a private room to stream in sync with chat, reactions, and flirty quotes between Wasim and Edilyn.</p>
                 </div>
 
                 <div className="lobby-cards-grid">
                   {/* CREATE PARTY CARD */}
-                  <div className="lobby-card" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: 'var(--radius-lg)' }}>
-                    <h2 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.25rem', color: 'white' }}>
+                  <div className="lobby-card">
+                    <h2 className="card-title">
                       <PlusCircle style={{ color: 'var(--primary)' }} />
                       Start a Party
                     </h2>
@@ -1115,7 +1154,6 @@ function App() {
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             required
-                            style={{ width: '100%', padding: '0.6rem 1rem', background: '#121214', color: 'white', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)' }}
                           >
                             <option value="" disabled>Select who is joining...</option>
                             <option value="Wasim">Wasim (Baby)</option>
@@ -1123,16 +1161,16 @@ function App() {
                           </select>
                         </div>
                       </div>
-                      <button type="submit" className="btn-primary" style={{ background: 'linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%)', width: '100%', padding: '0.65rem', borderRadius: 'var(--radius-md)', fontWeight: 'bold' }}>
+                      <button type="submit" className="btn-primary">
                         Create Room & Watch
                       </button>
                     </form>
                   </div>
 
                   {/* JOIN PARTY CARD */}
-                  <div className="lobby-card" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: 'var(--radius-lg)' }}>
-                    <h2 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.25rem', color: 'white' }}>
-                      <Users style={{ color: 'var(--secondary)' }} />
+                  <div className="lobby-card">
+                    <h2 className="card-title">
+                      <Users style={{ color: 'var(--primary)' }} />
                       Join a Party
                     </h2>
                     <p className="card-desc" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.5rem 0 1.25rem 0' }}>Enter the room code shared by your partner to jump into their stream.</p>
@@ -1146,7 +1184,6 @@ function App() {
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             required
-                            style={{ width: '100%', padding: '0.6rem 1rem', background: '#121214', color: 'white', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)' }}
                           >
                             <option value="" disabled>Select who is joining...</option>
                             <option value="Wasim">Wasim (Baby)</option>
@@ -1164,11 +1201,10 @@ function App() {
                             value={roomIdInput}
                             onChange={(e) => setRoomIdInput(e.target.value)}
                             required
-                            style={{ width: '100%', padding: '0.6rem 1rem', background: '#121214', color: 'white', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)' }}
                           />
                         </div>
                       </div>
-                      <button type="submit" className="btn-primary" style={{ background: 'linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%)', width: '100%', padding: '0.65rem', borderRadius: 'var(--radius-md)', fontWeight: 'bold' }}>
+                      <button type="submit" className="btn-primary">
                         Join Stream Room
                       </button>
                     </form>
@@ -1204,7 +1240,7 @@ function App() {
                     <select 
                       value={selectedServer}
                       onChange={(e) => switchServer(e.target.value)}
-                      style={{ background: '#121214', color: 'white', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-sm)', padding: '0.35rem 0.6rem', fontSize: '0.8rem' }}
+                      style={{ background: '#ffffff', color: 'var(--text-primary)', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-sm)', padding: '0.35rem 0.6rem', fontSize: '0.8rem' }}
                     >
                       {MOVIE_SERVERS.map(s => (
                         <option key={s.id} value={s.id}>{s.name}</option>
