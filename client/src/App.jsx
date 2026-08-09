@@ -28,11 +28,11 @@ const DEFAULT_MOVIES = [];
 const REACTIONS = ['❤️', '😂', '😮', '🔥', '🍿', '😢'];
 
 const MOVIE_SERVERS = [
-  { id: 'vidsrc_pro', name: 'Server 1 (VidSrc Pro - High Speed)', getUrl: (tmdbId) => `https://vidsrc.pro/embed/movie/${tmdbId}` },
-  { id: 'autoembed', name: 'Server 2 (AutoEmbed - High Stability)', getUrl: (tmdbId) => `https://player.autoembed.cc/embed/movie/${tmdbId}` },
-  { id: 'embed_su', name: 'Server 3 (Embed.su - 1080p HD)', getUrl: (tmdbId) => `https://embed.su/embed/movie/${tmdbId}` },
-  { id: 'vidsrc_me', name: 'Server 4 (VidSrc ME - Fast Mirror)', getUrl: (tmdbId) => `https://vidsrc.me/embed/movie/${tmdbId}` },
-  { id: '2embed', name: 'Server 5 (2Embed - Multi Mirror)', getUrl: (tmdbId) => `https://www.2embed.cc/embed/${tmdbId}` }
+  { id: 'vidsrc_me', name: 'Server 1 (VidSrc ME - Fast & Clean)', getUrl: (tmdbId) => `https://vidsrc.me/embed/movie/${tmdbId}` },
+  { id: 'vidsrc_pm', name: 'Server 2 (VidSrc PM - HD Mirror)', getUrl: (tmdbId) => `https://vidsrc.pm/embed/movie/${tmdbId}` },
+  { id: 'vidsrc_to', name: 'Server 3 (VidSrc TO - Widescreen)', getUrl: (tmdbId) => `https://vidsrc.to/embed/movie/${tmdbId}` },
+  { id: 'autoembed', name: 'Server 4 (AutoEmbed - Global Fallback)', getUrl: (tmdbId) => `https://autoembed.co/movie/tmdb/${tmdbId}` },
+  { id: 'multiembed', name: 'Server 5 (SuperEmbed - Multi Mirror)', getUrl: (tmdbId) => `https://multiembed.mov/directstream.php?video_id=${tmdbId}&tmdb=1` }
 ];
 
 const POPULAR_MOVIES = [
@@ -92,7 +92,7 @@ function App() {
   const [freeMovieQuery, setFreeMovieQuery] = useState('');
   const [freeSearchResults, setFreeSearchResults] = useState([]);
   const [isSearchingMovies, setIsSearchingMovies] = useState(false);
-  const [selectedServer, setSelectedServer] = useState('vidsrc');
+  const [selectedServer, setSelectedServer] = useState('vidsrc_me');
   
   // Local File States
   const [localFile, setLocalFile] = useState(null);
