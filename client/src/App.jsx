@@ -84,6 +84,7 @@ function App() {
   const [localFile, setLocalFile] = useState(null);
   const [localFileUrl, setLocalFileUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [partnerUpload, setPartnerUpload] = useState(null);
   
   // Custom Player States
   const [isPlaying, setIsPlaying] = useState(false);
@@ -185,7 +186,12 @@ function App() {
         }, 3000);
       });
 
+      newSocket.on('partner_upload_progress', (data) => {
+        setPartnerUpload(data);
+      });
+
       newSocket.on('video_changed', (video) => {
+        setPartnerUpload(null); // Reset progress
         setCurrentVideo(video);
         setIsPlaying(false);
         setCurrentTime(0);
@@ -358,6 +364,8 @@ function App() {
   const handleLoadedMetadata = () => {
     if (videoRef.current) {
       setDuration(videoRef.current.duration);
+      // Auto-sync playback state with room on load
+      requestSync();
     }
   };
 
@@ -499,46 +507,65 @@ function App() {
     loadLocalFile(file);
   };
 
-  const loadLocalFile = async (file) => {
+  const loadLocalFile = (file) => {
     setIsUploading(true);
     setLocalFile(file);
     
-    try {
-      // Local object URL for instant, latency-free playback on the host
-      const objectUrl = URL.createObjectURL(file);
-      setLocalFileUrl(objectUrl);
-      
-      const uploadUrl = import.meta.env.DEV ? 'http://localhost:5000/api/upload' : '/api/upload';
-      const response = await fetch(uploadUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': file.type || 'video/mp4',
-          'X-File-Name': encodeURIComponent(file.name)
-        },
-        body: file // Upload raw binary
-      });
-
-      if (!response.ok) throw new Error('Failed to upload video to local server');
-      const data = await response.json();
-      
-      // Update room video to point to the newly hosted server URL
-      if (socket) {
-        const localMovie = {
-          id: 'local-' + Date.now(),
-          title: file.name,
-          url: data.url, // "/api/video"
-          description: `Streaming directly from ${username}'s local storage.`,
-          isLocalFile: false
-        };
-        socket.emit('video_change', { roomId, video: localMovie, username });
+    // Instantly play locally for host
+    const objectUrl = URL.createObjectURL(file);
+    setLocalFileUrl(objectUrl);
+    
+    setCurrentVideo({
+      id: 'local-' + Date.now(),
+      title: file.name,
+      url: objectUrl,
+      description: 'Uploading to server in the background...',
+      isLocalFile: true
+    });
+    
+    const uploadUrl = import.meta.env.DEV ? 'http://localhost:5000/api/upload' : '/api/upload';
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', uploadUrl);
+    xhr.setRequestHeader('Content-Type', file.type || 'video/mp4');
+    xhr.setRequestHeader('X-File-Name', encodeURIComponent(file.name));
+    
+    // Track upload progress
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percent = Math.round((event.loaded / event.total) * 100);
+        if (socket) {
+          socket.emit('upload_progress', { roomId, username, percent, fileName: file.name });
+        }
       }
-      triggerSyncToast('Video uploaded and streaming to room!');
-    } catch (err) {
-      console.error(err);
-      alert('Upload failed: ' + err.message);
-    } finally {
+    };
+    
+    xhr.onload = () => {
       setIsUploading(false);
-    }
+      if (xhr.status >= 200 && xhr.status < 300) {
+        const data = JSON.parse(xhr.responseText);
+        // Once finished, emit video_change to update the room for the partner
+        if (socket) {
+          const localMovie = {
+            id: 'local-' + Date.now(),
+            title: file.name,
+            url: data.url, // "/api/video"
+            description: `Streaming directly from ${username}'s local storage.`,
+            isLocalFile: false
+          };
+          socket.emit('video_change', { roomId, video: localMovie, username });
+        }
+        triggerSyncToast('Video uploaded and streaming to room!');
+      } else {
+        alert('Upload failed: ' + xhr.statusText);
+      }
+    };
+    
+    xhr.onerror = () => {
+      setIsUploading(false);
+      alert('Upload connection failed');
+    };
+    
+    xhr.send(file);
   };
 
   const removeLocalFile = () => {
@@ -686,7 +713,18 @@ function App() {
         {/* LEFT PANEL: VIDEOPLAYER & CONTROLS, LIBRARY */}
         <div className="main-content">
           <div className="player-wrapper" onDragOver={handleDragOver} onDrop={handleDrop}>
-            {videoSourceUrl ? (
+            {partnerUpload ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '1.5rem', padding: '2rem', background: '#0e0b16', color: 'white' }}>
+                <div style={{ position: 'relative', width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div className="status-dot" style={{ width: '60px', height: '60px', borderRadius: '50%', border: '4px dashed var(--primary)', animation: 'spin 2s linear infinite' }}></div>
+                  <span style={{ position: 'absolute', fontWeight: 'bold', fontSize: '1.1rem' }}>{partnerUpload.percent}%</span>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <p style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>Streaming Incoming Movie</p>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.25rem' }}>{partnerUpload.username} is sending <strong>{partnerUpload.fileName}</strong> to the theater...</p>
+                </div>
+              </div>
+            ) : videoSourceUrl ? (
               <video
                 ref={videoRef}
                 src={videoSourceUrl}

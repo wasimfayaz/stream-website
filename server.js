@@ -110,6 +110,10 @@ io.on('connection', (socket) => {
     io.to(roomId).emit('receive_reaction', { reaction, username, id: Math.random().toString() });
   });
 
+  socket.on('upload_progress', ({ roomId, username, percent, fileName }) => {
+    socket.to(roomId).emit('partner_upload_progress', { username, percent, fileName });
+  });
+
   socket.on('video_change', ({ roomId, video, username }) => {
     const room = rooms[roomId];
     if (room) {

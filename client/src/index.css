@@ -1021,3 +1021,12 @@ body {
   background: var(--secondary);
   transform: translateY(-1px);
 }
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
