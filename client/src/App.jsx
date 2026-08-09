@@ -28,12 +28,13 @@ const DEFAULT_MOVIES = [];
 const REACTIONS = ['❤️', '😂', '😮', '🔥', '🍿', '😢'];
 
 const MOVIE_SERVERS = [
-  { id: '2embed', name: 'Server 1 (2Embed - Original English HD)', getUrl: (imdbId) => `https://www.2embed.cc/embed/${imdbId}` },
-  { id: 'vidsrc_cc', name: 'Server 2 (VidSrc CC - Pure English Track)', getUrl: (imdbId) => `https://vidsrc.cc/v2/embed/movie/${imdbId}` },
-  { id: 'vidsrc_net', name: 'Server 3 (VidSrc NET - Global English)', getUrl: (imdbId) => `https://vidsrc.net/embed/movie/${imdbId}` },
-  { id: 'vidsrc_me', name: 'Server 4 (VidSrc ME - English Audio)', getUrl: (imdbId) => `https://vidsrc.me/embed/movie?imdb=${imdbId}&lang=en` },
-  { id: 'moviesapi', name: 'Server 5 (MoviesAPI - Global English Mirror)', getUrl: (imdbId) => `https://moviesapi.club/movie/${imdbId}` },
-  { id: 'autoembed', name: 'Server 6 (AutoEmbed - Forced English)', getUrl: (imdbId) => `https://player.autoembed.cc/embed/movie/${imdbId}?lang=en` }
+  { id: 'vidsrc_pro', name: 'Server 1 (Vidsrc PRO - Vela/Rigel/Vega/Algol)', getUrl: (imdbId) => `https://vidsrc.pro/embed/movie/${imdbId}` },
+  { id: '2embed', name: 'Server 2 (2Embed - Original English HD)', getUrl: (imdbId) => `https://www.2embed.cc/embed/${imdbId}` },
+  { id: 'vidsrc_cc', name: 'Server 3 (VidSrc CC - Pure English Track)', getUrl: (imdbId) => `https://vidsrc.cc/v2/embed/movie/${imdbId}` },
+  { id: 'vidsrc_net', name: 'Server 4 (VidSrc NET - Global English)', getUrl: (imdbId) => `https://vidsrc.net/embed/movie/${imdbId}` },
+  { id: 'vidsrc_me', name: 'Server 5 (VidSrc ME - English Audio)', getUrl: (imdbId) => `https://vidsrc.me/embed/movie?imdb=${imdbId}&lang=en` },
+  { id: 'moviesapi', name: 'Server 6 (MoviesAPI - Global English Mirror)', getUrl: (imdbId) => `https://moviesapi.club/movie/${imdbId}` },
+  { id: 'autoembed', name: 'Server 7 (AutoEmbed - Forced English)', getUrl: (imdbId) => `https://player.autoembed.cc/embed/movie/${imdbId}?lang=en` }
 ];
 
 const GENRES = ['All', 'Romance', 'Action', 'Comedy', 'Drama', 'Sci-Fi', '🇵🇭 Filipino'];
@@ -112,7 +113,7 @@ function App() {
   const [freeMovieQuery, setFreeMovieQuery] = useState('');
   const [freeSearchResults, setFreeSearchResults] = useState([]);
   const [isSearchingMovies, setIsSearchingMovies] = useState(false);
-  const [selectedServer, setSelectedServer] = useState('2embed');
+  const [selectedServer, setSelectedServer] = useState('vidsrc_pro');
   
   // Local File States
   const [localFile, setLocalFile] = useState(null);
