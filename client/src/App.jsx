@@ -116,6 +116,7 @@ function App() {
 
   // Refs
   const videoRef = useRef(null);
+  const playerWrapperRef = useRef(null);
   const chatEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const ignoreTimeUpdate = useRef(false);
@@ -529,13 +530,22 @@ function App() {
   };
 
   const requestFullscreen = () => {
-    if (videoRef.current) {
-      if (videoRef.current.requestFullscreen) {
-        videoRef.current.requestFullscreen();
-      } else if (videoRef.current.webkitRequestFullscreen) {
-        videoRef.current.webkitRequestFullscreen();
-      } else if (videoRef.current.msRequestFullscreen) {
-        videoRef.current.msRequestFullscreen();
+    const target = playerWrapperRef.current || videoRef.current;
+    if (!target) return;
+
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      if (target.requestFullscreen) {
+        target.requestFullscreen();
+      } else if (target.webkitRequestFullscreen) {
+        target.webkitRequestFullscreen();
+      } else if (target.msRequestFullscreen) {
+        target.msRequestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
       }
     }
   };
@@ -888,7 +898,17 @@ function App() {
       <div className="room-container">
         {/* LEFT PANEL: VIDEOPLAYER & CONTROLS, LIBRARY */}
         <div className="main-content">
-          <div className="player-wrapper" onDragOver={handleDragOver} onDrop={handleDrop}>
+          <div ref={playerWrapperRef} className="player-wrapper" onDragOver={handleDragOver} onDrop={handleDrop}>
+            {/* Always visible Floating Fullscreen Button */}
+            <button 
+              className="player-floating-fullscreen-btn" 
+              onClick={requestFullscreen}
+              title="Toggle Theater Fullscreen"
+            >
+              <Maximize2 size={16} color="white" />
+              <span className="fullscreen-btn-text">Fullscreen</span>
+            </button>
+
             {/* Synchronized Flirt Toast overlay on top of video / inside fullscreen */}
             {flirtyQuote && (
               <div className="video-flirt-overlay">
