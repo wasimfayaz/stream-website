@@ -1119,31 +1119,45 @@ function App() {
       {/* Mobile-only bottom navigation */}
       <nav className="mobile-bottom-nav">
         <button 
-          className={`mobile-nav-item ${['movies', 'watch-together', 'local', 'custom'].includes(activeTab) ? 'active' : ''}`}
+          className={`mobile-nav-item ${activeTab === 'movies' ? 'active' : ''}`}
           onClick={() => setActiveTab('movies')}
         >
-          <Film size={20} />
+          <Film size={18} />
           <span>Theater</span>
+        </button>
+        <button 
+          className={`mobile-nav-item ${activeTab === 'local' ? 'active' : ''}`}
+          onClick={() => setActiveTab('local')}
+        >
+          <Upload size={18} />
+          <span>Upload</span>
+        </button>
+        <button 
+          className={`mobile-nav-item ${activeTab === 'custom' ? 'active' : ''}`}
+          onClick={() => setActiveTab('custom')}
+        >
+          <Globe size={18} />
+          <span>URL</span>
         </button>
         <button 
           className={`mobile-nav-item ${activeTab === 'watchlist' ? 'active' : ''}`}
           onClick={() => setActiveTab('watchlist')}
         >
-          <Bookmark size={20} />
+          <Bookmark size={18} />
           <span>Watchlist</span>
         </button>
         <button 
           className={`mobile-nav-item ${activeTab === 'history' ? 'active' : ''}`}
           onClick={() => setActiveTab('history')}
         >
-          <History size={20} />
+          <History size={18} />
           <span>History</span>
         </button>
         <button 
           className={`mobile-nav-item ${activeTab === 'memories' ? 'active' : ''}`}
           onClick={() => setActiveTab('memories')}
         >
-          <HeartHandshake size={20} />
+          <HeartHandshake size={18} />
           <span>Memories</span>
         </button>
       </nav>
@@ -1598,8 +1612,20 @@ function App() {
                     onDrop={handleDrop}
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    <strong>Drag & Drop your video file here</strong>
-                    <p>or click to browse local files (MP4, WebM, MKV)</p>
+                    <Upload size={32} style={{ color: 'var(--primary)', marginBottom: '0.5rem' }} />
+                    <strong style={{ fontSize: '1rem' }}>Select or Drag & Drop Video File</strong>
+                    <p style={{ fontSize: '0.825rem', marginTop: '0.25rem' }}>Supports MP4, WebM, MKV, AVI movies on phones & laptops</p>
+                    <button 
+                      type="button" 
+                      className="btn-primary" 
+                      style={{ marginTop: '1rem', width: 'auto', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', margin: '1rem auto 0 auto' }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        fileInputRef.current?.click();
+                      }}
+                    >
+                      <FileVideo size={18} /> Choose Movie / Local File
+                    </button>
                   </div>
                 ) : (
                   <div className="loaded-file-indicator">
