@@ -18,14 +18,15 @@ import {
   Link,
   RefreshCw,
   Trash2,
-  Heart
+  Heart,
+  Search
 } from 'lucide-react';
 
 const SOCKET_URL = import.meta.env.VITE_WS_URL || (import.meta.env.DEV ? 'http://localhost:5000' : window.location.origin);
 
 const DEFAULT_MOVIES = [];
 
-const REACTIONS = ['❤️', '😂', '😮', '🔥', '🍿', '😢'];
+const REACTIONS = ['Like', 'Love', 'Laugh', 'Wow', 'Sad', 'Fire'];
 
 const MOVIE_SERVERS = [
   { id: 'vidsrc_pro', name: 'Server 1 (Vidsrc PRO - Vela/Rigel/Vega/Algol)', getUrl: (imdbId) => `https://vidsrc.pro/embed/movie/${imdbId}` },
@@ -843,7 +844,7 @@ function App() {
               <Film size={14} /> Home
             </span>
             <span className={`pill-nav-link ${activeTab === 'watch-together' ? 'active' : ''}`} onClick={() => setActiveTab('watch-together')}>
-              🍿 Watch Together
+              Watch Together
             </span>
             <span className={`pill-nav-link ${activeTab === 'local' ? 'active' : ''}`} onClick={() => setActiveTab('local')}>Upload & Stream</span>
             <span className={`pill-nav-link ${activeTab === 'custom' ? 'active' : ''}`} onClick={() => setActiveTab('custom')}>Custom URL</span>
@@ -871,7 +872,7 @@ function App() {
           
           <div className="user-status-pill" style={{ padding: '0.4rem 0.85rem', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
             <div className="status dot" style={{ backgroundColor: joinedRoom ? 'var(--primary)' : 'var(--text-muted)' }}></div>
-            <span style={{ fontSize: '0.8rem' }}><strong>Edilyn ❤️ Wasim</strong></span>
+            <span style={{ fontSize: '0.8rem' }}><strong>Edilyn & Wasim</strong></span>
           </div>
         </div>
       </header>
@@ -1050,7 +1051,7 @@ function App() {
                   {currentVideo.title}
                 </h2>
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-                  {currentVideo.isLocalFile ? '📂 Watch together via matching local files' : currentVideo.isCustom ? '🔗 Custom network URL' : '🎬 Curated Library'}
+                  {currentVideo.isLocalFile ? 'Watch together via matching local files' : currentVideo.isCustom ? 'Custom network URL' : 'Curated Library'}
                 </p>
               </div>
               <button className="btn-action-sync" onClick={requestSync}>
@@ -1073,7 +1074,7 @@ function App() {
                 className={`tab-btn ${activeTab === 'watch-together' ? 'active' : ''}`}
                 onClick={() => setActiveTab('watch-together')}
               >
-                🍿 Watch Together
+                Watch Together
               </button>
               <button 
                 className={`tab-btn ${activeTab === 'local' ? 'active' : ''}`}
@@ -1212,9 +1213,9 @@ function App() {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.25)', padding: '0.6rem 0.85rem', borderRadius: 'var(--radius-sm)', color: '#fef3c7', fontSize: '0.825rem', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(24, 24, 27, 0.04)', border: '1px solid var(--border-light)', padding: '0.6rem 0.85rem', borderRadius: 'var(--radius-sm)', color: 'var(--text-secondary)', fontSize: '0.825rem', marginBottom: '1.5rem' }}>
                   <Volume2 size={18} color="var(--primary)" style={{ flexShrink: 0 }} />
-                  <span><strong>Audio & Language Options:</strong> You can select <strong>English Audio</strong> inside the player by clicking the <strong>⚙️ Settings Gear</strong> or <strong>💬 Audio/CC Icon</strong> in the bottom right corner of the video screen!</span>
+                  <span><strong>Audio & Language Options:</strong> You can select <strong>English Audio</strong> inside the player by clicking the <strong>Settings Gear</strong> or <strong>Audio/CC Icon</strong> in the bottom right corner of the video screen!</span>
                 </div>
 
                 {freeSearchResults.length > 0 ? (
@@ -1228,7 +1229,7 @@ function App() {
                           playFreeMovie(movie);
                         }}
                       >
-                        <span className="movie-card-badge">★ {movie.rating || '7.5'}</span>
+                        <span className="movie-card-badge">Rating: {movie.rating || '7.5'}</span>
                         <img 
                           src={movie.poster_path ? (movie.poster_path.startsWith('http') ? movie.poster_path : `https://image.tmdb.org/t/p/w500${movie.poster_path}`) : movie.poster} 
                           alt={movie.title} 
@@ -1364,7 +1365,7 @@ function App() {
                 <div className="users-list">
                   {users.map(u => (
                     <div key={u.id} className={`user-badge ${u.username === username ? 'me' : ''}`}>
-                      👤 {u.username} {u.username === username ? '(You)' : ''}
+                      <Users size={12} style={{ marginRight: '0.25rem' }} /> {u.username} {u.username === username ? '(You)' : ''}
                     </div>
                   ))}
                 </div>
@@ -1419,9 +1420,11 @@ function App() {
             </>
           ) : (
             <div style={{ padding: '2rem 1.25rem', textAlign: 'center', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center', gap: '1.25rem' }}>
-              <div style={{ fontSize: '3rem', animation: 'heartBeat 2s infinite' }}>🍿</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.5rem' }}>
+                <Tv size={48} style={{ color: 'var(--primary)', opacity: 0.8 }} />
+              </div>
               <div>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'white', marginBottom: '0.5rem' }}>Watch Together</h3>
+                <h3 style={{ fontSize: 'var(--font-md)', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Watch Together</h3>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
                   Want to watch in sync with Edilyn? Start or join a Watch Together room to chat in real-time, send flirty reactions, and share local files!
                 </p>
