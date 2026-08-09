@@ -36,6 +36,7 @@ const MOVIE_SERVERS = [
 ];
 
 const POPULAR_MOVIES = [
+  { id: 'tt0251127', title: 'How to Lose a Guy in 10 Days', year: '2003', poster: 'https://m.media-amazon.com/images/M/MV5BMjE4NTA1NzExN15BMl5BanBnXkFtZTYwNjc3MjM3._V1_QL75_UY562_CR0,0,380,562_.jpg', overview: 'Ben bets his coworkers that he can make a woman fall in love with him in 10 days. But along comes Andie, a writer with her own agenda.' },
   { id: 'tt0120338', title: 'Titanic', year: '1997', poster: 'https://image.tmdb.org/t/p/w500/9cqN121KmBkWi828D8RStfiHWTo.jpg', overview: 'A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.' },
   { id: 'tt0332280', title: 'The Notebook', year: '2004', poster: 'https://image.tmdb.org/t/p/w500/rNzQIGRG81KScujVJme2cTSu2.jpg', overview: 'An epic love story centered around an older man who reads aloud to an older woman in a nursing home.' },
   { id: 'tt3783958', title: 'La La Land', year: '2016', poster: 'https://image.tmdb.org/t/p/w500/uDO8zWDhfWwo1ikxsRFAZWVvMxs.jpg', overview: 'While navigating their careers in Los Angeles, a pianist and an actress fall in love while attempting to reconcile their aspirations.' },
@@ -370,9 +371,23 @@ function App() {
     if (e) e.preventDefault();
     if (!freeMovieQuery.trim()) return;
     setIsSearchingMovies(true);
+
+    // Auto-correct common title typos (e.g. "how to love a guy" -> "how to lose a guy")
+    let queryToSearch = freeMovieQuery;
+    if (queryToSearch.toLowerCase().includes('how to love a guy')) {
+      queryToSearch = queryToSearch.replace(/how to love a guy/i, 'How to Lose a Guy');
+    }
+
     try {
-      const res = await fetch(`https://www.omdbapi.com/?s=${encodeURIComponent(freeMovieQuery)}&apikey=thewdb&type=movie`);
-      const data = await res.json();
+      let res = await fetch(`https://www.omdbapi.com/?s=${encodeURIComponent(queryToSearch)}&apikey=thewdb&type=movie`);
+      let data = await res.json();
+      
+      // Retry with original query if auto-correct returned nothing
+      if (!data.Search && queryToSearch !== freeMovieQuery) {
+        res = await fetch(`https://www.omdbapi.com/?s=${encodeURIComponent(freeMovieQuery)}&apikey=thewdb&type=movie`);
+        data = await res.json();
+      }
+
       if (data.Search) {
         // Map OMDb results to our standard format
         const mappedResults = data.Search.filter(m => m.Poster !== 'N/A').map(m => ({
