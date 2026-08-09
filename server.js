@@ -46,9 +46,15 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// ==========================================
-// AUTHENTICATION & COUPLE ROUTES
-// ==========================================
+// Health & DB Connection Check
+app.get('/api/health', async (req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ status: 'ok', database: 'connected', time: new Date() });
+  } catch (err) {
+    res.status(500).json({ status: 'error', database: 'disconnected', error: err.message });
+  }
+});
 
 // Register new user
 app.post('/api/auth/register', async (req, res) => {
