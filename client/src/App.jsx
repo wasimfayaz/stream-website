@@ -28,10 +28,11 @@ const DEFAULT_MOVIES = [];
 const REACTIONS = ['❤️', '😂', '😮', '🔥', '🍿', '😢'];
 
 const MOVIE_SERVERS = [
-  { id: 'vidsrc', name: 'Server 1 (VidSrc)', getUrl: (tmdbId) => `https://vidsrc.to/embed/movie/${tmdbId}` },
-  { id: 'autoembed', name: 'Server 2 (AutoEmbed)', getUrl: (tmdbId) => `https://autoembed.co/movie/tmdb/${tmdbId}` },
-  { id: '2embed', name: 'Server 3 (2Embed)', getUrl: (tmdbId) => `https://www.2embed.cc/embed/${tmdbId}` },
-  { id: 'multiembed', name: 'Server 4 (SuperEmbed)', getUrl: (tmdbId) => `https://multiembed.mov/directstream.php?video_id=${tmdbId}&tmdb=1` }
+  { id: 'vidsrc_pro', name: 'Server 1 (VidSrc Pro - High Speed)', getUrl: (tmdbId) => `https://vidsrc.pro/embed/movie/${tmdbId}` },
+  { id: 'autoembed', name: 'Server 2 (AutoEmbed - High Stability)', getUrl: (tmdbId) => `https://player.autoembed.cc/embed/movie/${tmdbId}` },
+  { id: 'embed_su', name: 'Server 3 (Embed.su - 1080p HD)', getUrl: (tmdbId) => `https://embed.su/embed/movie/${tmdbId}` },
+  { id: 'vidsrc_me', name: 'Server 4 (VidSrc ME - Fast Mirror)', getUrl: (tmdbId) => `https://vidsrc.me/embed/movie/${tmdbId}` },
+  { id: '2embed', name: 'Server 5 (2Embed - Multi Mirror)', getUrl: (tmdbId) => `https://www.2embed.cc/embed/${tmdbId}` }
 ];
 
 const POPULAR_MOVIES = [
@@ -550,10 +551,19 @@ function App() {
     }
   };
 
-  // Sync request
+  // Sync request for both local files & free movie server embeds
   const requestSync = () => {
     if (socket) {
-      socket.emit('sync_request', { roomId });
+      if (currentVideo && currentVideo.isIframe) {
+        socket.emit('video_change', { 
+          roomId, 
+          video: { ...currentVideo, syncKey: Date.now() }, 
+          username 
+        });
+        triggerSyncToast('Synchronized movie stream on both screens!');
+      } else {
+        socket.emit('sync_request', { roomId });
+      }
     }
   };
 
