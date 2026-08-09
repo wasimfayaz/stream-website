@@ -827,96 +827,7 @@ function App() {
               : currentVideo.url) 
           : '');
 
-  if (!joinedRoom) {
-    return (
-      <div className="lobby-container">
-        <div className="lobby-hero">
-          <h1>Babies <span>Watch Party</span></h1>
-          <p>Wasim & Edilyn's private theater to watch movies together in real-time. Chat, send reactions, and stay close. Mahal kita, Baby! ❤️</p>
-        </div>
 
-        <div className="lobby-cards-grid">
-          {/* CREATE PARTY CARD */}
-          <div className="lobby-card">
-            <h2 className="card-title">
-              <PlusCircle style={{ color: 'var(--primary)' }} />
-              Start a Party
-            </h2>
-            <p className="card-desc">Create a new theater room and share the link with your partner.</p>
-            
-            <form onSubmit={handleCreateRoom}>
-              <div className="form-group">
-                <label>Your Username</label>
-                <div className="input-wrapper">
-                  <span className="input-icon">👤</span>
-                  <select 
-                    className="form-input"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                    style={{ paddingLeft: '2.5rem', background: '#0f172a', color: 'white', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-md)' }}
-                  >
-                    <option value="" disabled>Select who is joining...</option>
-                    <option value="Wasim">Wasim (Baby)</option>
-                    <option value="Edilyn">Edilyn (Baby)</option>
-                  </select>
-                </div>
-              </div>
-              <button type="submit" className="btn-primary">
-                Create Room & Watch
-              </button>
-            </form>
-          </div>
-
-          {/* JOIN PARTY CARD */}
-          <div className="lobby-card">
-            <h2 className="card-title">
-              <Users style={{ color: 'var(--secondary)' }} />
-              Join a Party
-            </h2>
-            <p className="card-desc">Enter the room code shared by your partner to jump into their stream.</p>
-            
-            <form onSubmit={handleJoinRoom}>
-              <div className="form-group">
-                <label>Your Username</label>
-                <div className="input-wrapper">
-                  <span className="input-icon">👤</span>
-                  <select 
-                    className="form-input"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                    style={{ paddingLeft: '2.5rem', background: '#0f172a', color: 'white', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-md)' }}
-                  >
-                    <option value="" disabled>Select who is joining...</option>
-                    <option value="Wasim">Wasim (Baby)</option>
-                    <option value="Edilyn">Edilyn (Baby)</option>
-                  </select>
-                </div>
-              </div>
-              <div className="form-group">
-                <label>Room Code</label>
-                <div className="input-wrapper">
-                  <span className="input-icon">🔑</span>
-                  <input 
-                    type="text" 
-                    placeholder="e.g. A1B2C3" 
-                    className="form-input"
-                    value={roomIdInput}
-                    onChange={(e) => setRoomIdInput(e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-              <button type="submit" className="btn-primary" style={{ background: 'linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%)' }}>
-                Join Stream Room
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <>
@@ -931,7 +842,9 @@ function App() {
             <span className={`pill-nav-link ${activeTab === 'movies' ? 'active' : ''}`} onClick={() => setActiveTab('movies')}>
               <Film size={14} /> Home
             </span>
-            <span className={`pill-nav-link ${activeTab === 'movies' ? 'active' : ''}`} onClick={() => setActiveTab('movies')}>Movies</span>
+            <span className={`pill-nav-link ${activeTab === 'watch-together' ? 'active' : ''}`} onClick={() => setActiveTab('watch-together')}>
+              🍿 Watch Together
+            </span>
             <span className={`pill-nav-link ${activeTab === 'local' ? 'active' : ''}`} onClick={() => setActiveTab('local')}>Upload & Stream</span>
             <span className={`pill-nav-link ${activeTab === 'custom' ? 'active' : ''}`} onClick={() => setActiveTab('custom')}>Custom URL</span>
           </div>
@@ -1181,6 +1094,12 @@ function App() {
                 Search & Stream Movies
               </button>
               <button 
+                className={`tab-btn ${activeTab === 'watch-together' ? 'active' : ''}`}
+                onClick={() => setActiveTab('watch-together')}
+              >
+                🍿 Watch Together
+              </button>
+              <button 
                 className={`tab-btn ${activeTab === 'local' ? 'active' : ''}`}
                 onClick={() => setActiveTab('local')}
               >
@@ -1193,6 +1112,93 @@ function App() {
                 Custom URL
               </button>
             </div>
+
+            {activeTab === 'watch-together' && !joinedRoom && (
+              <div className="lobby-container" style={{ margin: '1rem auto', padding: '1rem', width: '100%' }}>
+                <div className="lobby-hero" style={{ textShadow: 'none', marginBottom: '2rem' }}>
+                  <h1 style={{ background: 'linear-gradient(135deg, #ffffff 40%, var(--primary) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontSize: '2.5rem' }}>Watch Together <span>Lobby</span></h1>
+                  <p style={{ color: 'var(--text-secondary)' }}>Create or join a private room to stream in sync with chat, reactions, and flirty quotes between Wasim and Edilyn.</p>
+                </div>
+
+                <div className="lobby-cards-grid">
+                  {/* CREATE PARTY CARD */}
+                  <div className="lobby-card" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: 'var(--radius-lg)' }}>
+                    <h2 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.25rem', color: 'white' }}>
+                      <PlusCircle style={{ color: 'var(--primary)' }} />
+                      Start a Party
+                    </h2>
+                    <p className="card-desc" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.5rem 0 1.25rem 0' }}>Create a new theater room and share the link with your partner.</p>
+                    
+                    <form onSubmit={handleCreateRoom}>
+                      <div className="form-group" style={{ marginBottom: '1rem' }}>
+                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>Your Username</label>
+                        <div className="input-wrapper">
+                          <select 
+                            className="form-input"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            required
+                            style={{ width: '100%', padding: '0.6rem 1rem', background: '#121214', color: 'white', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)' }}
+                          >
+                            <option value="" disabled>Select who is joining...</option>
+                            <option value="Wasim">Wasim (Baby)</option>
+                            <option value="Edilyn">Edilyn (Baby)</option>
+                          </select>
+                        </div>
+                      </div>
+                      <button type="submit" className="btn-primary" style={{ background: 'linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%)', width: '100%', padding: '0.65rem', borderRadius: 'var(--radius-md)', fontWeight: 'bold' }}>
+                        Create Room & Watch
+                      </button>
+                    </form>
+                  </div>
+
+                  {/* JOIN PARTY CARD */}
+                  <div className="lobby-card" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: 'var(--radius-lg)' }}>
+                    <h2 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.25rem', color: 'white' }}>
+                      <Users style={{ color: 'var(--secondary)' }} />
+                      Join a Party
+                    </h2>
+                    <p className="card-desc" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.5rem 0 1.25rem 0' }}>Enter the room code shared by your partner to jump into their stream.</p>
+                    
+                    <form onSubmit={handleJoinRoom}>
+                      <div className="form-group" style={{ marginBottom: '1rem' }}>
+                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>Your Username</label>
+                        <div className="input-wrapper">
+                          <select 
+                            className="form-input"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            required
+                            style={{ width: '100%', padding: '0.6rem 1rem', background: '#121214', color: 'white', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)' }}
+                          >
+                            <option value="" disabled>Select who is joining...</option>
+                            <option value="Wasim">Wasim (Baby)</option>
+                            <option value="Edilyn">Edilyn (Baby)</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div className="form-group" style={{ marginBottom: '1rem' }}>
+                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>Room Code</label>
+                        <div className="input-wrapper">
+                          <input 
+                            type="text" 
+                            placeholder="e.g. A1B2C3" 
+                            className="form-input"
+                            value={roomIdInput}
+                            onChange={(e) => setRoomIdInput(e.target.value)}
+                            required
+                            style={{ width: '100%', padding: '0.6rem 1rem', background: '#121214', color: 'white', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)' }}
+                          />
+                        </div>
+                      </div>
+                      <button type="submit" className="btn-primary" style={{ background: 'linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%)', width: '100%', padding: '0.65rem', borderRadius: 'var(--radius-md)', fontWeight: 'bold' }}>
+                        Join Stream Room
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {activeTab === 'movies' && (
               <div className="free-movies-container">
@@ -1412,81 +1418,109 @@ function App() {
           </div>
         </div>
 
-        {/* RIGHT PANEL: SHARE INFO, CHAT, REACTIONS */}
         <div className="sidebar">
-          {/* Share Section */}
-          <div className="sidebar-header">
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Tv size={18} color="var(--primary)" /> Share Theater Link
-            </h2>
-            
-            <div className="room-code-badge">
-              <span>CODE: {roomId}</span>
-              <div style={{ display: 'flex', gap: '0.25rem' }}>
-                <button className="btn-copy" onClick={copyRoomCode} title="Copy code">
-                  {copiedCode ? <Check size={16} /> : <Copy size={16} />}
-                </button>
-                <button className="btn-copy" onClick={copyRoomLink} title="Copy full invitation URL">
-                  {copiedLink ? <Check size={16} /> : <Link size={16} />}
-                </button>
-              </div>
-            </div>
-
-            <div className="users-list">
-              {users.map(u => (
-                <div key={u.id} className={`user-badge ${u.username === username ? 'me' : ''}`}>
-                  👤 {u.username} {u.username === username ? '(You)' : ''}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Reaction Tray */}
-          <div className="reaction-tray">
-            {REACTIONS.map(reactChar => (
-              <button 
-                key={reactChar} 
-                className="reaction-btn"
-                onClick={() => handleSendReaction(reactChar)}
-                title={`Send ${reactChar} reaction`}
-              >
-                {reactChar}
-              </button>
-            ))}
-          </div>
-
-          {/* Chat Messages */}
-          <div className="chat-messages-container">
-            {messages.map(msg => (
-              <div 
-                key={msg.id} 
-                className={`chat-bubble ${msg.isSystem ? 'system' : msg.sender === username ? 'mine' : ''}`}
-              >
-                {!msg.isSystem && (
-                  <div className="message-meta">
-                    {msg.sender === username ? 'You' : msg.sender}
+          {joinedRoom ? (
+            <>
+              {/* Share Section */}
+              <div className="sidebar-header">
+                <h2 style={{ fontSize: '1.1rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Tv size={18} color="var(--primary)" /> Share Theater Link
+                </h2>
+                
+                <div className="room-code-badge">
+                  <span>CODE: {roomId}</span>
+                  <div style={{ display: 'flex', gap: '0.25rem' }}>
+                    <button className="btn-copy" onClick={copyRoomCode} title="Copy code">
+                      {copiedCode ? <Check size={16} /> : <Copy size={16} />}
+                    </button>
+                    <button className="btn-copy" onClick={copyRoomLink} title="Copy full invitation URL">
+                      {copiedLink ? <Check size={16} /> : <Link size={16} />}
+                    </button>
                   </div>
-                )}
-                <div>{msg.text}</div>
-              </div>
-            ))}
-            <div ref={chatEndRef}></div>
-          </div>
+                </div>
 
-          {/* Chat input */}
-          <form onSubmit={handleSendMessage} className="chat-input-form">
-            <input
-              type="text"
-              placeholder="Send message..."
-              className="chat-input"
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-              required
-            />
-            <button type="submit" className="btn-send">
-              <Send size={16} />
-            </button>
-          </form>
+                <div className="users-list">
+                  {users.map(u => (
+                    <div key={u.id} className={`user-badge ${u.username === username ? 'me' : ''}`}>
+                      👤 {u.username} {u.username === username ? '(You)' : ''}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Reaction Tray */}
+              <div className="reaction-tray">
+                {REACTIONS.map(reactChar => (
+                  <button 
+                    key={reactChar} 
+                    className="reaction-btn"
+                    onClick={() => handleSendReaction(reactChar)}
+                    title={`Send ${reactChar} reaction`}
+                  >
+                    {reactChar}
+                  </button>
+                ))}
+              </div>
+
+              {/* Chat Messages */}
+              <div className="chat-messages-container">
+                {messages.map(msg => (
+                  <div 
+                    key={msg.id} 
+                    className={`chat-bubble ${msg.isSystem ? 'system' : msg.sender === username ? 'mine' : ''}`}
+                  >
+                    {!msg.isSystem && (
+                      <div className="message-meta">
+                        {msg.sender === username ? 'You' : msg.sender}
+                      </div>
+                    )}
+                    <div>{msg.text}</div>
+                  </div>
+                ))}
+                <div ref={chatEndRef}></div>
+              </div>
+
+              {/* Chat input */}
+              <form onSubmit={handleSendMessage} className="chat-input-form">
+                <input
+                  type="text"
+                  placeholder="Send message..."
+                  className="chat-input"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  required
+                />
+                <button type="submit" className="btn-send">
+                  <Send size={16} />
+                </button>
+              </form>
+            </>
+          ) : (
+            <div style={{ padding: '2rem 1.25rem', textAlign: 'center', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center', gap: '1.25rem' }}>
+              <div style={{ fontSize: '3rem', animation: 'heartBeat 2s infinite' }}>🍿</div>
+              <div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'white', marginBottom: '0.5rem' }}>Watch Together</h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                  Want to watch in sync with Edilyn? Start or join a Watch Together room to chat in real-time, send flirty reactions, and share local files!
+                </p>
+              </div>
+              <button 
+                onClick={() => setActiveTab('watch-together')} 
+                className="btn-primary" 
+                style={{ 
+                  background: 'linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%)', 
+                  borderRadius: 'var(--radius-md)', 
+                  fontWeight: 'bold', 
+                  padding: '0.75rem',
+                  border: 'none',
+                  color: 'white',
+                  cursor: 'pointer'
+                }}
+              >
+                Go to Lobby
+              </button>
+            </div>
+          )}
         </div>
       </div>
       
