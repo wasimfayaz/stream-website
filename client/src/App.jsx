@@ -750,14 +750,16 @@ function App() {
     window.location.href = window.location.pathname; // Reload back to lobby
   };
 
-  // Determine current video source
-  const videoSourceUrl = (localFile && (currentVideo.isLocalFile || currentVideo.url === 'p2p-local'))
-    ? localFileUrl
-    : (currentVideo.url && currentVideo.url !== 'p2p-local'
-        ? (currentVideo.url.startsWith('/') 
-            ? `${SOCKET_URL}${currentVideo.url}` 
-            : currentVideo.url) 
-        : '');
+  // Determine current video source (for HTML5 <video> tag)
+  const videoSourceUrl = currentVideo.isIframe 
+    ? '' 
+    : (localFile && (currentVideo.isLocalFile || currentVideo.url === 'p2p-local'))
+      ? localFileUrl
+      : (currentVideo.url && currentVideo.url !== 'p2p-local'
+          ? (currentVideo.url.startsWith('/') 
+              ? `${SOCKET_URL}${currentVideo.url}` 
+              : currentVideo.url) 
+          : '');
 
   if (!joinedRoom) {
     return (
@@ -992,8 +994,8 @@ function App() {
               </div>
             )}
 
-            {/* Custom overlay controls */}
-            {videoSourceUrl && (
+            {/* Custom overlay controls (Only for HTML5 videos and local files, not free server iframe embeds) */}
+            {videoSourceUrl && !currentVideo.isIframe && (
               <div className="custom-controls-overlay">
                 <div className="scrubber-container">
                   <input
