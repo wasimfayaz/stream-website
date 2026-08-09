@@ -1,23 +1,28 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* Minimal White / Charcoal Palette */
-  --bg-dark: #fafafa;
+  /* Designer Color Palette */
+  --bg-dark: #f4f6fa;
   --bg-panel: #ffffff;
   --bg-panel-solid: #ffffff;
-  --border-light: #e4e4e7;
-  --border-focus: #18181b;
+  --border-light: rgba(90, 112, 206, 0.12);
+  --border-focus: #04349c;
   
-  --primary: #18181b;
-  --primary-glow: rgba(24, 24, 27, 0.05);
-  --secondary: #27272a;
-  --secondary-glow: rgba(39, 39, 42, 0.05);
+  /* Brand Colors from Palette */
+  --primary: #04349c;
+  --primary-glow: rgba(4, 52, 156, 0.06);
+  --secondary: #3c79c6;
+  --secondary-glow: rgba(60, 121, 198, 0.06);
   
-  --text-primary: #18181b;
-  --text-secondary: #52525b;
-  --text-muted: #888893;
+  --accent-cornflower: #5a70ce;
+  --accent-olive: #45512d;
   
-  --success: #16a34a;
+  /* Typography Colors */
+  --text-primary: #1c2711;
+  --text-secondary: #374151;
+  --text-muted: #6b7280;
+  
+  --success: #45512d; /* Olive green success */
   --danger: #dc2626;
   --warning: #ca8a04;
   
@@ -151,7 +156,7 @@ body {
 .pill-nav-links {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 0.5rem;
   min-width: 0;
 }
 
@@ -166,10 +171,18 @@ body {
   align-items: center;
   gap: 0.4rem;
   white-space: nowrap;
+  padding: 0.4rem 0.85rem;
+  border-radius: 9999px;
 }
 
-.pill-nav-link:hover, .pill-nav-link.active {
-  color: var(--text-primary);
+.pill-nav-link:hover {
+  background: var(--primary-glow);
+  color: var(--primary);
+}
+
+.pill-nav-link.active {
+  background: rgba(4, 52, 156, 0.08);
+  color: var(--primary);
   font-weight: 600;
 }
 
@@ -220,6 +233,12 @@ body {
   color: var(--text-primary);
 }
 
+.lobby-hero h1 span {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent-cornflower) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 .lobby-hero p {
   color: var(--text-secondary);
   font-size: var(--font-sm);
@@ -241,12 +260,13 @@ body {
   box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .lobby-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--text-primary);
+  transform: translateY(-4px);
+  border-color: var(--accent-cornflower);
+  box-shadow: 0 16px 32px -10px rgba(90, 112, 206, 0.16), 0 2px 4px rgba(90, 112, 206, 0.04);
 }
 
 .card-title {
@@ -299,6 +319,7 @@ body {
 .form-input:focus {
   outline: none;
   border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(4, 52, 156, 0.12);
 }
 
 .btn-primary {
@@ -307,7 +328,7 @@ body {
   color: #ffffff;
   border: none;
   border-radius: var(--radius-md);
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 1.25rem;
   font-size: var(--font-sm);
   font-weight: 600;
   cursor: pointer;
@@ -315,11 +336,14 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(4, 52, 156, 0.15);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-primary:hover {
   background: var(--secondary);
+  box-shadow: 0 6px 16px rgba(4, 52, 156, 0.25);
+  transform: translateY(-1px);
 }
 
 /* Room Layout */
@@ -428,8 +452,8 @@ body {
 .btn-action-sync {
   background: #ffffff;
   border: 1px solid var(--border-light);
-  color: var(--text-primary);
-  padding: 0.4rem 0.8rem;
+  color: var(--primary);
+  padding: 0.4rem 0.85rem;
   border-radius: 9999px;
   font-size: var(--font-xs);
   cursor: pointer;
@@ -441,9 +465,20 @@ body {
 }
 
 .btn-action-sync:hover {
+  background: var(--primary-glow);
+  border-color: var(--primary);
+}
+
+.btn-action-sync-solid {
   background: var(--primary);
   color: #ffffff;
   border-color: var(--primary);
+}
+
+.btn-action-sync-solid:hover {
+  background: var(--secondary) !important;
+  color: #ffffff !important;
+  border-color: var(--secondary) !important;
 }
 
 .movie-desc {
@@ -956,7 +991,7 @@ body {
   }
 
   .mobile-nav-item.active {
-    color: var(--text-primary);
+    color: var(--primary);
     font-weight: 700;
   }
 
@@ -1022,14 +1057,7 @@ body {
   }
 
   .section-header-tabs {
-    gap: 0;
-    margin-bottom: 1rem;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .section-header-tabs::-webkit-scrollbar {
-    display: none;
+    display: none !important;
   }
 
   .tab-btn {

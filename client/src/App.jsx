@@ -702,6 +702,15 @@ function App() {
       }
     }
     
+    // Check if it's a direct raw video link (e.g. ends with a common video format extension)
+    const rawVideoExtensions = ['.mp4', '.webm', '.m3u8', '.mpd', '.ogg', '.mov', '.mkv', '.avi'];
+    const isRawVideo = rawVideoExtensions.some(ext => finalUrl.toLowerCase().includes(ext));
+    
+    // If it's not already YouTube (isIframe) and not a direct raw video, treat it as an embed/iframe player
+    if (!isIframe && !isRawVideo) {
+      isIframe = true;
+    }
+    
     const customMovie = {
       id: 'custom-' + Date.now(),
       title: customTitle.trim(),
@@ -1167,7 +1176,7 @@ function App() {
                   <button className="btn-action-sync" onClick={requestSync} title="Request full synchronization from host">
                     <RefreshCw size={14} /> Sync Room
                   </button>
-                  <button className="btn-action-sync" onClick={syncTimestamps} style={{ background: 'var(--primary)', color: '#ffffff', border: 'none' }} title="Force-sync current time stamp to partner">
+                  <button className="btn-action-sync btn-action-sync-solid" onClick={syncTimestamps} title="Force-sync current time stamp to partner">
                     <Clock size={14} /> Sync Stamps
                   </button>
                 </div>
