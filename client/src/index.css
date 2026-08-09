@@ -102,10 +102,57 @@ body {
   box-shadow: var(--shadow-lg);
 }
 
+.header-nav-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.header-brand span {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.header-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.btn-leave-room {
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  color: #dc2626;
+  border-radius: 9999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-leave-room:hover {
+  background: rgba(220, 38, 38, 0.15);
+}
+
 .pill-nav-links {
   display: flex;
   align-items: center;
   gap: 1.5rem;
+  min-width: 0;
 }
 
 .pill-nav-link {
@@ -118,6 +165,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.4rem;
+  white-space: nowrap;
 }
 
 .pill-nav-link:hover, .pill-nav-link.active {
@@ -133,14 +181,17 @@ body {
   border: 1px solid var(--border-light);
   padding: 0.4rem 0.85rem;
   border-radius: 9999px;
-  font-size: var(--font-xs);
-  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
 }
 
-.status-dot, .status.dot {
+.status-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
+  flex-shrink: 0;
   transition: background-color 0.3s ease;
 }
 
@@ -845,31 +896,33 @@ body {
     gap: 0;
   }
 
-  .floating-pill-header > div {
-    width: 100% !important;
-    display: flex;
-    align-items: center;
-    overflow: visible;
-    flex-wrap: wrap;
+  .header-nav-row {
+    gap: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    border-bottom: 1px solid var(--border-light);
   }
 
-  /* Top row: brand + leave + status */
-  .floating-pill-header > div:last-child {
+  .header-nav-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .header-brand {
+    display: none;
+  }
+
+  .header-actions-row {
     justify-content: flex-end;
-    gap: 0.5rem;
     padding: 0.5rem 0.75rem;
     border-bottom: 1px solid var(--border-light);
     order: -1;
+    gap: 0.5rem;
   }
 
-  /* Nav row */
-  .floating-pill-header > div:first-child {
-    padding: 0 0.5rem;
-    gap: 0;
-  }
-
-  .floating-pill-header > div:first-child > a {
-    display: none;
+  .btn-leave-room {
+    padding: 0.3rem 0.65rem;
+    font-size: 0.7rem;
   }
 
   .pill-nav-links {
@@ -898,6 +951,7 @@ body {
     border-bottom: 2px solid transparent;
     color: var(--text-secondary);
     font-weight: 500;
+    gap: 0.3rem;
   }
 
   .pill-nav-link.active {
@@ -909,8 +963,6 @@ body {
   .user-status-pill {
     padding: 0.3rem 0.6rem;
     font-size: 0.7rem;
-    border: 1px solid var(--border-light) !important;
-    background: #ffffff !important;
   }
 
   /* --- Room Layout --- */

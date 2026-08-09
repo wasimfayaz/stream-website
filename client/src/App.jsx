@@ -904,11 +904,9 @@ function App() {
   return (
     <>
       <header className="floating-pill-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <a href="/" className="brand" style={{ gap: '0.5rem' }} onClick={(e) => { e.preventDefault(); leaveRoom(); }}>
-            <span style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--text-primary)' }}>
-              M
-            </span>
+        <div className="header-nav-row">
+          <a href="/" className="header-brand" onClick={(e) => { e.preventDefault(); leaveRoom(); }}>
+            <span>M</span>
           </a>
           <div className="pill-nav-links">
             <span className={`pill-nav-link ${activeTab === 'movies' ? 'active' : ''}`} onClick={() => setActiveTab('movies')}>
@@ -922,28 +920,19 @@ function App() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div className="header-actions-row">
           {joinedRoom && (
             <button 
               onClick={leaveRoom} 
-              className="btn-action-sync btn-leave" 
-              style={{ 
-                background: 'rgba(220, 38, 38, 0.08)', 
-                borderColor: 'rgba(220, 38, 38, 0.25)', 
-                color: '#dc2626',
-                borderRadius: '9999px',
-                padding: '0.35rem 0.85rem',
-                fontSize: '0.75rem',
-                fontWeight: '600'
-              }}
+              className="btn-leave-room"
             >
-              <span>Leave Room</span>
+              Leave Room
             </button>
           )}
           
           <div className="user-status-pill">
-            <div className="status dot" style={{ backgroundColor: joinedRoom ? 'var(--primary)' : 'var(--text-muted)' }}></div>
-            <span style={{ fontSize: '0.75rem' }}><strong>Edilyn & Wasim</strong></span>
+            <div className="status-dot" style={{ backgroundColor: joinedRoom ? 'var(--primary)' : 'var(--text-muted)' }}></div>
+            <span>Edilyn & Wasim</span>
           </div>
         </div>
       </header>
