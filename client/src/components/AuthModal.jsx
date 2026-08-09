@@ -20,6 +20,7 @@ export default function AuthModal({ onAuthSuccess, initialUser }) {
   const [resetCodeInput, setResetCodeInput] = useState('');
   const [newPasswordInput, setNewPasswordInput] = useState('');
   const [successMessage, setSuccessMessage] = useState(null);
+  const [sandboxCode, setSandboxCode] = useState(null);
   
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -28,6 +29,7 @@ export default function AuthModal({ onAuthSuccess, initialUser }) {
     e.preventDefault();
     setError(null);
     setSuccessMessage(null);
+    setSandboxCode(null);
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/auth/login`, {
@@ -41,6 +43,9 @@ export default function AuthModal({ onAuthSuccess, initialUser }) {
         setVerificationEmail(data.email);
         setMode('verification');
         setError(data.error || 'Email verification code sent.');
+        if (data.mockCode) {
+          setSandboxCode(data.mockCode);
+        }
         return;
       }
 
@@ -65,6 +70,7 @@ export default function AuthModal({ onAuthSuccess, initialUser }) {
     e.preventDefault();
     setError(null);
     setSuccessMessage(null);
+    setSandboxCode(null);
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/auth/register`, {
@@ -80,6 +86,9 @@ export default function AuthModal({ onAuthSuccess, initialUser }) {
         setVerificationEmail(data.email);
         setMode('verification');
         setSuccessMessage('A 6-digit verification code has been sent to your email.');
+        if (data.mockCode) {
+          setSandboxCode(data.mockCode);
+        }
         return;
       }
       
@@ -126,6 +135,7 @@ export default function AuthModal({ onAuthSuccess, initialUser }) {
     e.preventDefault();
     setError(null);
     setSuccessMessage(null);
+    setSandboxCode(null);
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/auth/forgot-password`, {
@@ -138,6 +148,9 @@ export default function AuthModal({ onAuthSuccess, initialUser }) {
       
       setSuccessMessage(data.message || 'Reset code sent to your email!');
       setMode('reset-password');
+      if (data.mockCode) {
+        setSandboxCode(data.mockCode);
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -362,6 +375,30 @@ export default function AuthModal({ onAuthSuccess, initialUser }) {
             <h2 className="auth-title">Verify Your Email</h2>
             <p className="auth-subtitle">We sent a 6-digit verification code to <strong>{verificationEmail}</strong></p>
 
+            {sandboxCode && (
+              <div style={{
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px dashed rgba(255,255,255,0.2)',
+                padding: '0.75rem',
+                borderRadius: 'var(--radius-sm)',
+                textAlign: 'center',
+                marginBottom: '1rem'
+              }}>
+                <p style={{ margin: 0, fontSize: '0.8rem', color: '#94a3b8' }}>
+                  Mock Email Sandbox (Local Testing)
+                </p>
+                <div style={{
+                  fontSize: '1.25rem',
+                  fontWeight: 'bold',
+                  color: 'var(--primary)',
+                  letterSpacing: '2px',
+                  marginTop: '0.25rem'
+                }}>
+                  {sandboxCode}
+                </div>
+              </div>
+            )}
+
             {successMessage && <div style={{ marginBottom: '1rem', color: '#10b981', background: 'rgba(16,185,129,0.1)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', fontSize: '0.88rem', textAlign: 'center' }}>{successMessage}</div>}
             {error && <div className="auth-error" style={{ marginBottom: '1rem' }}>{error}</div>}
 
@@ -435,6 +472,30 @@ export default function AuthModal({ onAuthSuccess, initialUser }) {
           <>
             <h2 className="auth-title">Reset Password</h2>
             <p className="auth-subtitle">Enter the reset code sent to your email and your new password</p>
+
+            {sandboxCode && (
+              <div style={{
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px dashed rgba(255,255,255,0.2)',
+                padding: '0.75rem',
+                borderRadius: 'var(--radius-sm)',
+                textAlign: 'center',
+                marginBottom: '1rem'
+              }}>
+                <p style={{ margin: 0, fontSize: '0.8rem', color: '#94a3b8' }}>
+                  Mock Email Sandbox (Local Testing)
+                </p>
+                <div style={{
+                  fontSize: '1.25rem',
+                  fontWeight: 'bold',
+                  color: 'var(--primary)',
+                  letterSpacing: '2px',
+                  marginTop: '0.25rem'
+                }}>
+                  {sandboxCode}
+                </div>
+              </div>
+            )}
 
             {successMessage && <div style={{ marginBottom: '1rem', color: '#10b981', background: 'rgba(16,185,129,0.1)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', fontSize: '0.88rem', textAlign: 'center' }}>{successMessage}</div>}
             {error && <div className="auth-error" style={{ marginBottom: '1rem' }}>{error}</div>}

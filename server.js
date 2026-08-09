@@ -146,7 +146,8 @@ app.post('/api/auth/register', async (req, res) => {
        </div>`
     );
 
-    res.json({ requiresVerification: true, email: user.email });
+    const isMock = !process.env.EMAIL_USER || !process.env.EMAIL_PASS;
+    res.json({ requiresVerification: true, email: user.email, mockCode: isMock ? verificationCode : null });
   } catch (err) {
     console.error('Registration error:', err);
     if (err.code === 'P2002') {
@@ -244,7 +245,8 @@ app.post('/api/auth/login', async (req, res) => {
          </div>`
       );
 
-      return res.status(403).json({ requiresVerification: true, email: user.email, error: 'Please verify your email address. A code has been sent to your email.' });
+      const isMock = !process.env.EMAIL_USER || !process.env.EMAIL_PASS;
+      return res.status(403).json({ requiresVerification: true, email: user.email, mockCode: isMock ? verificationCode : null, error: 'Please verify your email address. A code has been sent to your email.' });
     }
 
     const token = jwt.sign(
@@ -305,7 +307,8 @@ app.post('/api/auth/forgot-password', async (req, res) => {
        <p>This code is valid for 15 minutes.</p>`
     );
 
-    res.json({ success: true, message: 'Reset code sent to your email' });
+    const isMock = !process.env.EMAIL_USER || !process.env.EMAIL_PASS;
+    res.json({ success: true, message: 'Reset code sent to your email', mockCode: isMock ? resetCode : null });
   } catch (err) {
     console.error('Forgot password error:', err);
     res.status(500).json({ error: 'Failed to send reset code' });
