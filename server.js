@@ -11,6 +11,51 @@ import fs from 'fs';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import nodemailer from 'nodemailer';
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER || process.env.GMAIL_USER,
+    pass: process.env.EMAIL_PASS || process.env.GMAIL_PASS
+  }
+});
+
+const sendEmail = async (to, subject, text, html) => {
+  const user = process.env.EMAIL_USER || process.env.GMAIL_USER;
+  const pass = process.env.EMAIL_PASS || process.env.GMAIL_PASS;
+
+  if (!user || !pass) {
+    console.log('\n==================================================');
+    console.log(`[MOCK EMAIL SANDBOX]`);
+    console.log(`To: ${to}`);
+    console.log(`Subject: ${subject}`);
+    console.log(`Content: ${text}`);
+    console.log('==================================================\n');
+    return { mock: true };
+  }
+
+  try {
+    const info = await transporter.sendMail({
+      from: `"Streaam Theater" <${user}>`,
+      to,
+      subject,
+      text,
+      html
+    });
+    console.log('Real email sent successfully:', info.messageId);
+    return info;
+  } catch (err) {
+    console.error('Failed to send real email via Gmail SMTP:', err);
+    console.log('\n==================================================');
+    console.log(`[MOCK EMAIL SANDBOX FALLBACK]`);
+    console.log(`To: ${to}`);
+    console.log(`Subject: ${subject}`);
+    console.log(`Content: ${text}`);
+    console.log('==================================================\n');
+    return { mock: true, error: err.message };
+  }
+};
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -62,6 +107,7 @@ app.get('/api/health', async (req, res) => {
 });
 
 // Register new user
+// Register new user
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { email, username, password } = req.body;
@@ -75,22 +121,86 @@ app.post('/api/auth/register', async (req, res) => {
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+
     const user = await prisma.user.create({
-      data: { email, username, passwordHash }
+      data: { 
+        email, 
+        username, 
+        passwordHash,
+        isVerified: false,
+        verificationCode
+      }
     });
 
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, username: user.username, coupleId: user.coupleId },
-      JWT_SECRET
+    // Send verification email
+    await sendEmail(
+      email,
+      'Verify your Streaam account',
+      `Hello ${username}! Your 6-digit verification code is: ${verificationCode}`,
+      `<h2>Welcome to Streaam!</h2>
+       <p>Thank you for signing up to share your permanent couple space.</p>
+       <p>Please enter the following 6-digit code on the signup screen to verify your email:</p>
+       <div style="font-size: 1.5rem; font-weight: bold; color: #ff4b2b; padding: 0.5rem 1rem; background: #f8fafc; border-radius: 4px; display: inline-block; letter-spacing: 2px;">
+         ${verificationCode}
+       </div>`
     );
 
-    res.json({ token, user: { id: user.id, email: user.email, username: user.username, coupleId: user.coupleId } });
+    res.json({ requiresVerification: true, email: user.email });
   } catch (err) {
     console.error('Registration error:', err);
     if (err.code === 'P2002') {
       return res.status(400).json({ error: 'User with this email already exists' });
     }
     res.status(500).json({ error: err.message || 'Failed to register user' });
+  }
+});
+
+// Verify registration code
+app.post('/api/auth/verify', async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    if (!email || !code) {
+      return res.status(400).json({ error: 'Email and verification code are required' });
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (user.verificationCode !== code) {
+      return res.status(400).json({ error: 'Invalid verification code' });
+    }
+
+    // Set user as verified
+    const updatedUser = await prisma.user.update({
+      where: { email },
+      data: { isVerified: true, verificationCode: null },
+      include: { couple: { include: { users: true } } }
+    });
+
+    const token = jwt.sign(
+      { userId: updatedUser.id, email: updatedUser.email, username: updatedUser.username, coupleId: updatedUser.coupleId },
+      JWT_SECRET
+    );
+
+    const partner = updatedUser.couple?.users.find(u => u.id !== updatedUser.id);
+
+    res.json({
+      token,
+      user: {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        username: updatedUser.username,
+        coupleId: updatedUser.coupleId,
+        couple: updatedUser.couple ? { id: updatedUser.couple.id, inviteCode: updatedUser.couple.inviteCode } : null,
+        partner: partner ? { id: partner.id, username: partner.username, email: partner.email } : null
+      }
+    });
+  } catch (err) {
+    console.error('Verification error:', err);
+    res.status(500).json({ error: 'Failed to verify account' });
   }
 });
 
@@ -116,6 +226,27 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
+    if (!user.isVerified) {
+      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+      await prisma.user.update({
+        where: { email },
+        data: { verificationCode }
+      });
+      
+      await sendEmail(
+        email,
+        'Verify your Streaam account',
+        `Hello ${user.username}! Your 6-digit verification code is: ${verificationCode}`,
+        `<h2>Verify your Streaam account</h2>
+         <p>Please enter the following 6-digit code to complete verification:</p>
+         <div style="font-size: 1.5rem; font-weight: bold; color: #ff4b2b; padding: 0.5rem 1rem; background: #f8fafc; border-radius: 4px; display: inline-block; letter-spacing: 2px;">
+           ${verificationCode}
+         </div>`
+      );
+
+      return res.status(403).json({ requiresVerification: true, email: user.email, error: 'Please verify your email address. A code has been sent to your email.' });
+    }
+
     const token = jwt.sign(
       { userId: user.id, email: user.email, username: user.username, coupleId: user.coupleId },
       JWT_SECRET
@@ -137,6 +268,86 @@ app.post('/api/auth/login', async (req, res) => {
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Failed to log in' });
+  }
+});
+
+// Request password reset code
+app.post('/api/auth/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return res.json({ success: true, message: 'If that email exists in our system, a reset code was sent!' });
+    }
+
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const resetExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes expiry
+
+    await prisma.user.update({
+      where: { email },
+      data: { resetCode, resetExpiry }
+    });
+
+    await sendEmail(
+      email,
+      'Reset your Streaam password',
+      `Hello ${user.username}! Your 6-digit password reset code is: ${resetCode}`,
+      `<h2>Password Reset Request</h2>
+       <p>You requested a password reset for your Streaam account.</p>
+       <p>Please enter the following 6-digit code on the reset screen to change your password:</p>
+       <div style="font-size: 1.5rem; font-weight: bold; color: #ff4b2b; padding: 0.5rem 1rem; background: #f8fafc; border-radius: 4px; display: inline-block; letter-spacing: 2px;">
+         ${resetCode}
+       </div>
+       <p>This code is valid for 15 minutes.</p>`
+    );
+
+    res.json({ success: true, message: 'Reset code sent to your email' });
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    res.status(500).json({ error: 'Failed to send reset code' });
+  }
+});
+
+// Reset password using reset code
+app.post('/api/auth/reset-password', async (req, res) => {
+  try {
+    const { email, code, newPassword } = req.body;
+    if (!email || !code || !newPassword) {
+      return res.status(400).json({ error: 'Email, reset code, and new password are required' });
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (!user.resetCode || user.resetCode !== code) {
+      return res.status(400).json({ error: 'Invalid reset code' });
+    }
+
+    if (user.resetExpiry && user.resetExpiry < new Date()) {
+      return res.status(400).json({ error: 'Reset code has expired' });
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({
+      where: { email },
+      data: {
+        passwordHash,
+        resetCode: null,
+        resetExpiry: null,
+        isVerified: true
+      }
+    });
+
+    res.json({ success: true, message: 'Password updated successfully. You can now login with your new password!' });
+  } catch (err) {
+    console.error('Reset password error:', err);
+    res.status(500).json({ error: 'Failed to reset password' });
   }
 });
 

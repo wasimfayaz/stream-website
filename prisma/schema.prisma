@@ -21,6 +21,10 @@ model User {
   watchlist     WatchlistItem[]
   ratings       Rating[]
   memories      Memory[]
+  isVerified    Boolean         @default(false)
+  verificationCode String?
+  resetCode     String?
+  resetExpiry   DateTime?
   createdAt     DateTime        @default(now())
 }
 
