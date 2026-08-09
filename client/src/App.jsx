@@ -1320,12 +1320,12 @@ function App() {
                   <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                     {freeSearchResults.length > 0 ? `Search Results for "${freeMovieQuery}"` : 'Direct Movie Search'}
                   </span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div className="server-select-container">
                     <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Streaming Server:</label>
                     <select 
                       value={selectedServer}
                       onChange={(e) => switchServer(e.target.value)}
-                      style={{ background: '#ffffff', color: 'var(--text-primary)', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-sm)', padding: '0.35rem 0.6rem', fontSize: '0.8rem' }}
+                      className="server-select-dropdown"
                     >
                       {MOVIE_SERVERS.map(s => (
                         <option key={s.id} value={s.id}>{s.name}</option>

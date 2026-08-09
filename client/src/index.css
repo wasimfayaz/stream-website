@@ -531,6 +531,45 @@ body {
   cursor: pointer;
 }
 
+/* Server Selector mobile optimization */
+.server-select-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.server-select-dropdown {
+  background: #ffffff;
+  color: var(--text-primary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.6rem;
+  font-size: 0.8rem;
+  max-width: 220px;
+  cursor: pointer;
+  outline: none;
+}
+
+.server-select-dropdown:focus {
+  border-color: var(--border-focus);
+}
+
+@media (max-width: 480px) {
+  .server-select-container {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .server-select-dropdown {
+    max-width: 180px;
+  }
+}
+
+@media (max-width: 360px) {
+  .server-select-dropdown {
+    max-width: 140px;
+  }
+}
+
 /* Floating Fullscreen button */
 .player-floating-fullscreen-btn {
   position: absolute;
