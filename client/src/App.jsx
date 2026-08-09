@@ -28,11 +28,11 @@ const DEFAULT_MOVIES = [];
 const REACTIONS = ['❤️', '😂', '😮', '🔥', '🍿', '😢'];
 
 const MOVIE_SERVERS = [
-  { id: 'vidsrc_cc', name: 'Server 1 (VidSrc CC - Ultra Fast)', getUrl: (imdbId) => `https://vidsrc.cc/v2/embed/movie/${imdbId}` },
-  { id: 'vidsrc_me', name: 'Server 2 (VidSrc ME - Clean HD)', getUrl: (imdbId) => `https://vidsrc.me/embed/movie?imdb=${imdbId}` },
-  { id: '2embed', name: 'Server 3 (2Embed - Stable)', getUrl: (imdbId) => `https://www.2embed.cc/embed/${imdbId}` },
+  { id: '2embed', name: 'Server 1 (2Embed - Global English HD & Stable)', getUrl: (imdbId) => `https://www.2embed.cc/embed/${imdbId}` },
+  { id: 'vidsrc_cc', name: 'Server 2 (VidSrc CC - English Original)', getUrl: (imdbId) => `https://vidsrc.cc/v2/embed/movie/${imdbId}` },
+  { id: 'vidsrc_me', name: 'Server 3 (VidSrc ME - Global HD)', getUrl: (imdbId) => `https://vidsrc.me/embed/movie?imdb=${imdbId}` },
   { id: 'vidsrc_pm', name: 'Server 4 (VidSrc PM - Fast Mirror)', getUrl: (imdbId) => `https://vidsrc.pm/embed/movie?imdb=${imdbId}` },
-  { id: 'multiembed', name: 'Server 5 (SuperEmbed - Multi Mirror)', getUrl: (imdbId) => `https://multiembed.mov/directstream.php?video_id=${imdbId}` }
+  { id: 'multiembed', name: 'Server 5 (SuperEmbed - Multi Audio/Subtitles)', getUrl: (imdbId) => `https://multiembed.mov/directstream.php?video_id=${imdbId}` }
 ];
 
 const POPULAR_MOVIES = [
@@ -45,6 +45,15 @@ const POPULAR_MOVIES = [
   { id: 'tt0816692', title: 'Interstellar', year: '2014', poster: 'https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg', overview: 'The adventures of a group of explorers who make use of a newly discovered wormhole to surpass the limitations on human space travel.' },
   { id: 'tt4154756', title: 'Avengers: Infinity War', year: '2018', poster: 'https://image.tmdb.org/t/p/w500/7WsyChLLEzFiDOVTGfaZaE3zRBV.jpg', overview: 'The Avengers and their allies must be willing to sacrifice all in an attempt to defeat the powerful Thanos.' },
   { id: 'tt0137523', title: 'Fight Club', year: '1999', poster: 'https://image.tmdb.org/t/p/w500/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg', overview: 'An insomniac office worker and a devil-may-care soap maker form an underground fight club.' }
+];
+
+const FILIPINO_MOVIES = [
+  { id: 'tt10249826', title: 'Hello, Love, Goodbye', year: '2019', poster: 'https://m.media-amazon.com/images/M/MV5BNzllMjY5NmItYTI2My00OWUxLWIyY2EtYTgzNzJiYzA2ZjUxXkEyXkFqcGc@._V1_SX300.jpg', overview: 'A nursing graduate working as a domestic helper in Hong Kong meets a bartender, and they navigate love and ambition.' },
+  { id: 'tt30222384', title: 'Rewind', year: '2023', poster: 'https://m.media-amazon.com/images/M/MV5BMDYwYWY0OTUtYTQ1MC00ODhjLWIwOGQtMDMzNzVhYjJhZjRhXkEyXkFqcGc@._V1_SX300.jpg', overview: 'John gets a chance to turn back time and save his wife Mary after a tragic accident.' },
+  { id: 'tt8887680', title: 'The Hows of Us', year: '2018', poster: 'https://m.media-amazon.com/images/M/MV5BOGZmNzc1ZjQtMDgzMS00Y2FlLWIxODktYzZlMzY5MjliYjRjXkEyXkFqcGc@._V1_SX300.jpg', overview: 'A young couple struggles to keep their relationship alive while building their dream house together.' },
+  { id: 'tt2950944', title: 'Four Sisters and a Wedding', year: '2013', poster: 'https://m.media-amazon.com/images/M/MV5BNTIzMTQ2NDEtMWJjMS00NDVhLWIyYzQtNTJkZDc4ZTIwMjgwXkEyXkFqcGc@._V1_SX300.jpg', overview: 'Four sisters try to stop their younger brother’s upcoming wedding.' },
+  { id: 'tt4179374', title: 'That Thing Called Tadhana', year: '2014', poster: 'https://m.media-amazon.com/images/M/MV5BMTgzMjM3MTA2Ml5BMl5BanBnXkFtZTgwNTU5MTY4NDE@._V1_SX300.jpg', overview: 'Two strangers meet at an airport and embark on a romantic road trip across Sagada.' },
+  { id: 'tt5214040', title: 'A Second Chance', year: '2015', poster: 'https://m.media-amazon.com/images/M/MV5BMjA5OTgxMDcyNV5BMl5BanBnXkFtZTgwMTQ3Mzk2NzE@._V1_SX300.jpg', overview: 'Popoy and Basha face the realities of marriage after their fairytale romance.' }
 ];
 
 const FLIRTY_QUOTES = [
@@ -1201,6 +1210,35 @@ function App() {
                     </div>
                   ))}
                 </div>
+
+                {freeSearchResults.length === 0 && (
+                  <>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '2rem', marginBottom: '1rem' }}>
+                      <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--primary)' }}>
+                        🇵🇭 Filipino Favorites (For Edilyn)
+                      </span>
+                    </div>
+
+                    <div className="movies-grid">
+                      {FILIPINO_MOVIES.map(movie => (
+                        <div 
+                          key={movie.id} 
+                          className="movie-thumbnail-card"
+                          onClick={() => playFreeMovie(movie)}
+                        >
+                          <img 
+                            src={movie.poster_path} 
+                            alt={movie.title} 
+                          />
+                          <div className="movie-thumbnail-overlay">
+                            <div className="movie-thumbnail-title">{movie.title}</div>
+                            <div className="movie-thumbnail-duration">▶ Play Stream</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             )}
 
