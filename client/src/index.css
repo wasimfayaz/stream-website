@@ -848,6 +848,15 @@ body {
   background: var(--secondary);
 }
 
+/* Mobile-only components — hidden on desktop */
+.mobile-top-bar {
+  display: none;
+}
+
+.mobile-bottom-nav {
+  display: none;
+}
+
 /* ===== Responsive Styles ===== */
 
 /* Tablet breakpoint */
@@ -877,92 +886,87 @@ body {
 
 /* Mobile breakpoint */
 @media (max-width: 768px) {
-  /* --- Header --- */
+  /* Hide desktop pill header on mobile */
   .floating-pill-header {
+    display: none !important;
+  }
+
+  /* Show mobile top status bar */
+  .mobile-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.85rem;
+    background: #ffffff;
+    border-bottom: 1px solid var(--border-light);
     position: sticky;
     top: 0;
-    margin: 0;
-    width: 100%;
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
-    border-top: none;
-    padding: 0;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-    background: #ffffff;
+    z-index: 100;
+  }
+
+  .mobile-top-left {
     display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0;
-  }
-
-  .header-nav-row {
-    gap: 0;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    border-bottom: 1px solid var(--border-light);
-  }
-
-  .header-nav-row::-webkit-scrollbar {
-    display: none;
-  }
-
-  .header-brand {
-    display: none;
-  }
-
-  .header-actions-row {
-    justify-content: flex-end;
-    padding: 0.5rem 0.75rem;
-    border-bottom: 1px solid var(--border-light);
-    order: -1;
-    gap: 0.5rem;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-primary);
   }
 
   .btn-leave-room {
     padding: 0.3rem 0.65rem;
     font-size: 0.7rem;
-  }
-
-  .pill-nav-links {
-    flex: 1;
-    min-width: 0;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    white-space: nowrap;
     display: flex;
-    gap: 0;
-    justify-content: flex-start;
-    padding: 0;
-    scrollbar-width: none;
-  }
-
-  .pill-nav-links::-webkit-scrollbar {
-    display: none;
-  }
-
-  .pill-nav-link {
-    font-size: 0.75rem;
-    padding: 0.65rem 0.85rem;
-    background: none;
-    border-radius: 0;
-    flex-shrink: 0;
-    border-bottom: 2px solid transparent;
-    color: var(--text-secondary);
-    font-weight: 500;
+    align-items: center;
     gap: 0.3rem;
   }
 
-  .pill-nav-link.active {
-    color: var(--text-primary);
-    border-bottom-color: var(--primary);
-    font-weight: 600;
+  /* Show mobile bottom navigation */
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    background: #ffffff;
+    border-top: 1px solid var(--border-light);
+    padding: 0.35rem 0;
+    padding-bottom: max(0.35rem, env(safe-area-inset-bottom));
+    justify-content: space-around;
+    align-items: center;
   }
 
-  .user-status-pill {
+  .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.6rem;
+    font-weight: 500;
+    font-family: var(--font-body);
+    cursor: pointer;
     padding: 0.3rem 0.6rem;
-    font-size: 0.7rem;
+    border-radius: var(--radius-md);
+    transition: color 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-nav-item.active {
+    color: var(--text-primary);
+    font-weight: 700;
+  }
+
+  .mobile-nav-item span {
+    line-height: 1;
+  }
+
+  /* Add bottom padding so content isn't hidden behind fixed bottom nav */
+  .room-container {
+    padding-bottom: 4.5rem;
   }
 
   /* --- Room Layout --- */

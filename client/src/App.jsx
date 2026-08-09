@@ -20,7 +20,10 @@ import {
   Clock,
   Trash2,
   Heart,
-  Search
+  Search,
+  Upload,
+  Globe,
+  LogOut
 } from 'lucide-react';
 
 const SOCKET_URL = import.meta.env.VITE_WS_URL || (import.meta.env.DEV ? 'http://localhost:5000' : window.location.origin);
@@ -936,6 +939,51 @@ function App() {
           </div>
         </div>
       </header>
+
+      {/* Mobile-only top status bar */}
+      <div className="mobile-top-bar">
+        <div className="mobile-top-left">
+          <div className="status-dot" style={{ backgroundColor: joinedRoom ? 'var(--primary)' : 'var(--text-muted)' }}></div>
+          <span>Edilyn & Wasim</span>
+        </div>
+        {joinedRoom && (
+          <button className="btn-leave-room" onClick={leaveRoom}>
+            <LogOut size={12} /> Leave
+          </button>
+        )}
+      </div>
+
+      {/* Mobile-only bottom navigation */}
+      <nav className="mobile-bottom-nav">
+        <button 
+          className={`mobile-nav-item ${activeTab === 'movies' ? 'active' : ''}`}
+          onClick={() => setActiveTab('movies')}
+        >
+          <Film size={20} />
+          <span>Home</span>
+        </button>
+        <button 
+          className={`mobile-nav-item ${activeTab === 'watch-together' ? 'active' : ''}`}
+          onClick={() => setActiveTab('watch-together')}
+        >
+          <Users size={20} />
+          <span>Together</span>
+        </button>
+        <button 
+          className={`mobile-nav-item ${activeTab === 'local' ? 'active' : ''}`}
+          onClick={() => setActiveTab('local')}
+        >
+          <Upload size={20} />
+          <span>Upload</span>
+        </button>
+        <button 
+          className={`mobile-nav-item ${activeTab === 'custom' ? 'active' : ''}`}
+          onClick={() => setActiveTab('custom')}
+        >
+          <Globe size={20} />
+          <span>URL</span>
+        </button>
+      </nav>
 
       <div className="room-container">
         {/* LEFT PANEL: VIDEOPLAYER & CONTROLS, LIBRARY */}
