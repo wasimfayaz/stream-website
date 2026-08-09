@@ -28,10 +28,10 @@ const DEFAULT_MOVIES = [];
 const REACTIONS = ['❤️', '😂', '😮', '🔥', '🍿', '😢'];
 
 const MOVIE_SERVERS = [
-  { id: 'vidsrc_me', name: 'Server 1 (VidSrc ME - Fast & Clean)', getUrl: (tmdbId) => `https://vidsrc.me/embed/movie/${tmdbId}` },
-  { id: 'vidsrc_pm', name: 'Server 2 (VidSrc PM - HD Mirror)', getUrl: (tmdbId) => `https://vidsrc.pm/embed/movie/${tmdbId}` },
-  { id: 'vidsrc_to', name: 'Server 3 (VidSrc TO - Widescreen)', getUrl: (tmdbId) => `https://vidsrc.to/embed/movie/${tmdbId}` },
-  { id: 'autoembed', name: 'Server 4 (AutoEmbed - Global Fallback)', getUrl: (tmdbId) => `https://autoembed.co/movie/tmdb/${tmdbId}` },
+  { id: 'vidsrc_cc', name: 'Server 1 (VidSrc CC - Ultra Fast)', getUrl: (tmdbId) => `https://vidsrc.cc/v2/embed/movie/${tmdbId}` },
+  { id: 'vidsrc_me', name: 'Server 2 (VidSrc ME - Clean HD)', getUrl: (tmdbId) => `https://vidsrc.me/embed/movie/${tmdbId}` },
+  { id: 'autoembed_cdn', name: 'Server 3 (AutoEmbed CDN)', getUrl: (tmdbId) => `https://player.autoembed.cc/embed/movie/${tmdbId}` },
+  { id: 'vidsrc_pm', name: 'Server 4 (VidSrc PM - Fast Mirror)', getUrl: (tmdbId) => `https://vidsrc.pm/embed/movie/${tmdbId}` },
   { id: 'multiembed', name: 'Server 5 (SuperEmbed - Multi Mirror)', getUrl: (tmdbId) => `https://multiembed.mov/directstream.php?video_id=${tmdbId}&tmdb=1` }
 ];
 
@@ -934,6 +934,7 @@ function App() {
                 className="video-element-iframe"
                 allowFullScreen
                 allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                referrerPolicy="no-referrer"
                 title={currentVideo.title}
                 style={{ width: '100%', height: '100%', border: 'none', background: '#000' }}
               />
