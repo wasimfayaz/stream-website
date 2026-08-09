@@ -906,7 +906,7 @@ function App() {
       <header className="floating-pill-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <a href="/" className="brand" style={{ gap: '0.5rem' }} onClick={(e) => { e.preventDefault(); leaveRoom(); }}>
-            <span style={{ fontSize: '1.25rem', fontWeight: '800', background: 'linear-gradient(135deg, #ffffff 40%, var(--primary) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            <span style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--text-primary)' }}>
               M
             </span>
           </a>
@@ -928,12 +928,12 @@ function App() {
               onClick={leaveRoom} 
               className="btn-action-sync btn-leave" 
               style={{ 
-                background: 'rgba(244, 63, 94, 0.15)', 
-                borderColor: 'rgba(244, 63, 94, 0.3)', 
-                color: '#fecaca',
+                background: 'rgba(220, 38, 38, 0.08)', 
+                borderColor: 'rgba(220, 38, 38, 0.25)', 
+                color: '#dc2626',
                 borderRadius: '9999px',
-                padding: '0.45rem 1rem',
-                fontSize: '0.8rem',
+                padding: '0.35rem 0.85rem',
+                fontSize: '0.75rem',
                 fontWeight: '600'
               }}
             >
@@ -941,9 +941,9 @@ function App() {
             </button>
           )}
           
-          <div className="user-status-pill" style={{ padding: '0.4rem 0.85rem', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <div className="user-status-pill">
             <div className="status dot" style={{ backgroundColor: joinedRoom ? 'var(--primary)' : 'var(--text-muted)' }}></div>
-            <span style={{ fontSize: '0.8rem' }}><strong>Edilyn & Wasim</strong></span>
+            <span style={{ fontSize: '0.75rem' }}><strong>Edilyn & Wasim</strong></span>
           </div>
         </div>
       </header>
