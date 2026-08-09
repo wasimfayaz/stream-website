@@ -26,7 +26,9 @@ import {
   LogOut,
   Bookmark,
   HeartHandshake,
-  History
+  History,
+  Menu,
+  X
 } from 'lucide-react';
 import WatchlistSection from './components/WatchlistSection';
 import MemoriesSection from './components/MemoriesSection';
@@ -102,6 +104,7 @@ function App() {
   const [roomIdInput, setRoomIdInput] = useState('');
   const [roomId, setRoomId] = useState(() => localStorage.getItem('streaam_room_id') || '');
   const [joinedRoom, setJoinedRoom] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Check URL query parameters & localStorage on load
   useEffect(() => {
@@ -1100,67 +1103,99 @@ function App() {
         </div>
       </header>
 
-      {/* Mobile-only top status bar */}
+      {/* Mobile-only top header with Hamburger toggle */}
       <div className="mobile-top-bar">
         <div className="mobile-top-left">
+          <a href="/" className="header-brand" onClick={(e) => { e.preventDefault(); handleLeaveRoom(); }}>
+            <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--primary)' }}>M</span>
+          </a>
           <div className="status-dot" style={{ backgroundColor: joinedRoom ? 'var(--primary)' : 'var(--text-muted)' }}></div>
-          <span>
-            {joinedRoom ? `Room: ${roomId}` : 'Not in room'}
+          <span style={{ fontWeight: 600, fontSize: '0.8rem' }}>
+            {joinedRoom ? `Room: ${roomId}` : 'StreaamSync'}
           </span>
         </div>
 
-        {joinedRoom && (
-          <button className="btn-leave-room" onClick={handleLeaveRoom}>
-            <LogOut size={12} /> Leave
-          </button>
-        )}
+        <button 
+          className="mobile-hamburger-btn" 
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle Menu"
+        >
+          {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
       </div>
 
-      {/* Mobile-only bottom navigation */}
-      <nav className="mobile-bottom-nav">
-        <button 
-          className={`mobile-nav-item ${activeTab === 'movies' ? 'active' : ''}`}
-          onClick={() => setActiveTab('movies')}
-        >
-          <Film size={18} />
-          <span>Theater</span>
-        </button>
-        <button 
-          className={`mobile-nav-item ${activeTab === 'local' ? 'active' : ''}`}
-          onClick={() => setActiveTab('local')}
-        >
-          <Upload size={18} />
-          <span>Upload</span>
-        </button>
-        <button 
-          className={`mobile-nav-item ${activeTab === 'custom' ? 'active' : ''}`}
-          onClick={() => setActiveTab('custom')}
-        >
-          <Globe size={18} />
-          <span>URL</span>
-        </button>
-        <button 
-          className={`mobile-nav-item ${activeTab === 'watchlist' ? 'active' : ''}`}
-          onClick={() => setActiveTab('watchlist')}
-        >
-          <Bookmark size={18} />
-          <span>Watchlist</span>
-        </button>
-        <button 
-          className={`mobile-nav-item ${activeTab === 'history' ? 'active' : ''}`}
-          onClick={() => setActiveTab('history')}
-        >
-          <History size={18} />
-          <span>History</span>
-        </button>
-        <button 
-          className={`mobile-nav-item ${activeTab === 'memories' ? 'active' : ''}`}
-          onClick={() => setActiveTab('memories')}
-        >
-          <HeartHandshake size={18} />
-          <span>Memories</span>
-        </button>
-      </nav>
+      {/* Mobile Hamburger Dropdown Menu Drawer */}
+      {mobileMenuOpen && (
+        <div className="mobile-menu-overlay" onClick={() => setMobileMenuOpen(false)}>
+          <div className="mobile-menu-drawer" onClick={(e) => e.stopPropagation()}>
+            <div className="mobile-menu-user-info">
+              <div className="user-status-pill" style={{ width: '100%', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <div className="status-dot" style={{ backgroundColor: joinedRoom ? 'var(--primary)' : 'var(--text-muted)' }}></div>
+                  <span>{joinedRoom ? `Room: ${roomId} (${username})` : 'Not in room'}</span>
+                </div>
+                {joinedRoom && (
+                  <button className="btn-leave-room" onClick={() => { handleLeaveRoom(); setMobileMenuOpen(false); }}>
+                    <LogOut size={12} /> Switch Room
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="mobile-menu-links">
+              <button 
+                className={`mobile-menu-link ${activeTab === 'movies' ? 'active' : ''}`}
+                onClick={() => { setActiveTab('movies'); setMobileMenuOpen(false); }}
+              >
+                <Film size={18} />
+                <span>Home (Search Movies)</span>
+              </button>
+              <button 
+                className={`mobile-menu-link ${activeTab === 'watch-together' ? 'active' : ''}`}
+                onClick={() => { setActiveTab('watch-together'); setMobileMenuOpen(false); }}
+              >
+                <Users size={18} />
+                <span>Watch Together Party</span>
+              </button>
+              <button 
+                className={`mobile-menu-link ${activeTab === 'local' ? 'active' : ''}`}
+                onClick={() => { setActiveTab('local'); setMobileMenuOpen(false); }}
+              >
+                <Upload size={18} />
+                <span>Upload & Stream Movie</span>
+              </button>
+              <button 
+                className={`mobile-menu-link ${activeTab === 'custom' ? 'active' : ''}`}
+                onClick={() => { setActiveTab('custom'); setMobileMenuOpen(false); }}
+              >
+                <Globe size={18} />
+                <span>Custom Video URL</span>
+              </button>
+              <button 
+                className={`mobile-menu-link ${activeTab === 'watchlist' ? 'active' : ''}`}
+                onClick={() => { setActiveTab('watchlist'); setMobileMenuOpen(false); }}
+              >
+                <Bookmark size={18} />
+                <span>Watchlist</span>
+              </button>
+              <button 
+                className={`mobile-menu-link ${activeTab === 'history' ? 'active' : ''}`}
+                onClick={() => { setActiveTab('history'); setMobileMenuOpen(false); }}
+              >
+                <History size={18} />
+                <span>History</span>
+              </button>
+              <button 
+                className={`mobile-menu-link ${activeTab === 'memories' ? 'active' : ''}`}
+                onClick={() => { setActiveTab('memories'); setMobileMenuOpen(false); }}
+              >
+                <HeartHandshake size={18} />
+                <span>Memories</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="room-container">
         {/* LEFT PANEL: VIDEOPLAYER & CONTROLS, LIBRARY */}
