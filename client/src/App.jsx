@@ -657,8 +657,8 @@ function App() {
     return (
       <div className="lobby-container">
         <div className="lobby-hero">
-          <h1>Wasim & Edilyn's <span>Cozy Theater</span></h1>
-          <p>Our private space to watch movies together, no matter the distance. Chat, send reactions, and stay close to each other. Mahal kita, Baby! ❤️</p>
+          <h1>Babies <span>Watch Party</span></h1>
+          <p>Wasim & Edilyn's private theater to watch movies together in real-time. Chat, send reactions, and stay close. Mahal kita, Baby! ❤️</p>
         </div>
 
         <div className="lobby-cards-grid">
@@ -680,7 +680,7 @@ function App() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required
-                    style={{ paddingLeft: '2.5rem', background: '#120e1c', color: 'white', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-md)' }}
+                    style={{ paddingLeft: '2.5rem', background: '#0f172a', color: 'white', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-md)' }}
                   >
                     <option value="" disabled>Select who is joining...</option>
                     <option value="Wasim">Wasim (Baby)</option>
@@ -712,7 +712,7 @@ function App() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required
-                    style={{ paddingLeft: '2.5rem', background: '#120e1c', color: 'white', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-md)' }}
+                    style={{ paddingLeft: '2.5rem', background: '#0f172a', color: 'white', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-md)' }}
                   >
                     <option value="" disabled>Select who is joining...</option>
                     <option value="Wasim">Wasim (Baby)</option>
@@ -747,14 +747,21 @@ function App() {
   return (
     <>
       <header className="app-header">
-        <a href="/" className="brand" onClick={(e) => { e.preventDefault(); leaveRoom(); }}>
-          <div className="brand-icon" style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)' }}>
-            <Tv size={22} color="white" />
+        <div className="header-top-row">
+          <a href="/" className="brand" onClick={(e) => { e.preventDefault(); leaveRoom(); }}>
+            <div className="brand-icon" style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)' }}>
+              <Tv size={22} color="white" />
+            </div>
+            <div className="brand-name">
+              Babies <span>Watch Party</span>
+            </div>
+          </a>
+          <div className="user-status-pill header-pill-mobile">
+            <div className="status-dot"></div>
+            <span>Watching as: <strong>{username}</strong></span>
           </div>
-          <div className="brand-name">
-            Baby<span>Sync</span>
-          </div>
-        </a>
+        </div>
+
         <div className="header-actions">
           <button 
             onClick={triggerFlirt} 
@@ -775,7 +782,7 @@ function App() {
           <button onClick={leaveRoom} className="btn-action-sync btn-leave" style={{ background: 'rgba(239, 68, 110, 0.15)', borderColor: 'rgba(239, 68, 110, 0.3)', color: '#fecaca' }}>
             <span className="leave-btn-text">Leave Room</span>
           </button>
-          <div className="user-status-pill">
+          <div className="user-status-pill header-pill-desktop">
             <div className="status-dot"></div>
             <span><span className="watching-prefix">Watching as: </span><strong>{username}</strong></span>
           </div>
@@ -787,7 +794,7 @@ function App() {
         <div className="main-content">
           <div className="player-wrapper" onDragOver={handleDragOver} onDrop={handleDrop}>
             {partnerUpload ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '1.5rem', padding: '2rem', background: '#0e0b16', color: 'white' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '1.5rem', padding: '2rem', background: '#050b14', color: 'white' }}>
                 <div style={{ position: 'relative', width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <div className="status-dot" style={{ width: '60px', height: '60px', borderRadius: '50%', border: '4px dashed var(--primary)', animation: 'spin 2s linear infinite' }}></div>
                   <span style={{ position: 'absolute', fontWeight: 'bold', fontSize: '1.1rem' }}>{partnerUpload.percent}%</span>
@@ -798,7 +805,7 @@ function App() {
                 </div>
               </div>
             ) : (currentVideo && currentVideo.url === 'p2p-local' && (!localFile || !hasConfirmedFile)) ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '1.5rem', padding: '2rem', background: '#0e0b16', color: 'white' }} onDragOver={handleDragOver} onDrop={handleDrop} onClick={() => fileInputRef.current?.click()}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '1.5rem', padding: '2rem', background: '#050b14', color: 'white' }} onDragOver={handleDragOver} onDrop={handleDrop} onClick={() => fileInputRef.current?.click()}>
                 <FileVideo size={48} color="var(--primary)" />
                 <div style={{ textAlign: 'center' }}>
                   <p style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>Local Sync File Required</p>
@@ -824,7 +831,7 @@ function App() {
                 muted={isMuted}
               />
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '1rem', padding: '2rem', background: '#0e0b16' }} onDragOver={handleDragOver} onDrop={handleDrop} onClick={() => fileInputRef.current?.click()}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '1rem', padding: '2rem', background: '#050b14' }} onDragOver={handleDragOver} onDrop={handleDrop} onClick={() => fileInputRef.current?.click()}>
                 <FileVideo size={48} color="var(--primary)" />
                 <div style={{ textAlign: 'center' }}>
                   <p style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>No video loaded yet</p>

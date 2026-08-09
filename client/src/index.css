@@ -2,21 +2,21 @@
 
 :root {
   /* Colors */
-  --bg-dark: #07050a;
-  --bg-panel: rgba(18, 14, 28, 0.6);
-  --bg-panel-solid: #120e1c;
-  --border-light: rgba(255, 255, 255, 0.08);
+  --bg-dark: #030712;
+  --bg-panel: rgba(15, 23, 42, 0.75);
+  --bg-panel-solid: #0f172a;
+  --border-light: rgba(56, 189, 248, 0.15);
   --border-focus: rgba(14, 165, 233, 0.6);
   
   --primary: #0ea5e9;
   --primary-glow: rgba(14, 165, 233, 0.35);
-  --secondary: #06b6d4;
-  --secondary-glow: rgba(6, 182, 212, 0.35);
-  --accent-cyan: #38bdf8;
+  --secondary: #38bdf8;
+  --secondary-glow: rgba(56, 189, 248, 0.35);
+  --accent-cyan: #0284c7;
   
-  --text-primary: #f3f4f6;
-  --text-secondary: #9ca3af;
-  --text-muted: #6b7280;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
   
   --success: #10b981;
   --danger: #ef4444;
@@ -51,8 +51,8 @@ body {
   font-family: var(--font-body);
   background-color: var(--bg-dark);
   background-image: 
-    radial-gradient(circle at 10% 20%, rgba(14, 165, 233, 0.1) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.08) 0%, transparent 40%);
+    radial-gradient(circle at 10% 20%, rgba(14, 165, 233, 0.15) 0%, transparent 45%),
+    radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.12) 0%, transparent 45%);
   background-attachment: fixed;
   color: var(--text-primary);
   min-height: 100vh;
@@ -87,8 +87,8 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 1.25rem 2rem;
-  background: rgba(7, 5, 10, 0.85);
-  backdrop-filter: blur(8px);
+  background: rgba(11, 19, 36, 0.9);
+  backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-light);
   position: sticky;
   top: 0;
@@ -109,7 +109,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+  box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
 }
 
 .brand-name {
@@ -117,7 +117,7 @@ body {
   font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: -0.5px;
-  background: linear-gradient(135deg, #ffffff 30%, #e9d5ff 100%);
+  background: linear-gradient(135deg, #ffffff 30%, #bae6fd 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -615,9 +615,9 @@ body {
 }
 
 .btn-action-sync {
-  background: rgba(168, 85, 247, 0.15);
-  border: 1px solid rgba(168, 85, 247, 0.4);
-  color: #e9d5ff;
+  background: rgba(14, 165, 233, 0.15);
+  border: 1px solid rgba(14, 165, 233, 0.35);
+  color: #e0f2fe;
   padding: 0.4rem 0.8rem;
   border-radius: 20px;
   font-size: 0.8rem;
@@ -889,9 +889,9 @@ body {
 }
 
 .user-badge {
-  background: rgba(168, 85, 247, 0.1);
-  border: 1px solid rgba(168, 85, 247, 0.25);
-  color: #e9d5ff;
+  background: rgba(14, 165, 233, 0.15);
+  border: 1px solid rgba(14, 165, 233, 0.3);
+  color: #e0f2fe;
   padding: 0.25rem 0.6rem;
   border-radius: 12px;
   font-size: 0.75rem;
@@ -901,9 +901,9 @@ body {
 }
 
 .user-badge.me {
-  background: rgba(236, 72, 153, 0.1);
-  border-color: rgba(236, 72, 153, 0.25);
-  color: #fbcfe8;
+  background: rgba(56, 189, 248, 0.18);
+  border-color: rgba(56, 189, 248, 0.35);
+  color: #f0f9ff;
 }
 
 /* REACTION TRAY */
@@ -954,8 +954,8 @@ body {
 
 .chat-bubble.mine {
   align-self: flex-end;
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(236, 72, 153, 0.2) 100%);
-  border-color: rgba(168, 85, 247, 0.25);
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.25) 0%, rgba(56, 189, 248, 0.25) 100%);
+  border-color: rgba(14, 165, 233, 0.35);
 }
 
 .chat-bubble.system {
@@ -1051,10 +1051,24 @@ body {
   70% { transform: scale(1); }
 }
 
+.header-top-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 .header-actions {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+}
+
+.header-pill-mobile {
+  display: none;
+}
+
+.header-pill-desktop {
+  display: flex;
 }
 
 @media (max-width: 1024px) {
@@ -1073,13 +1087,40 @@ body {
     border-left: none;
     border-top: 1px solid var(--border-light);
     height: 520px;
-    background: #07050a;
+    background: #050b14;
   }
 }
 
 @media (max-width: 768px) {
   .app-header {
     padding: 0.75rem 1rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+  }
+  .header-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+  .header-pill-desktop {
+    display: none;
+  }
+  .header-pill-mobile {
+    display: flex;
+    padding: 0.35rem 0.65rem;
+    font-size: 0.75rem;
+  }
+  .header-actions {
+    display: flex;
+    width: 100%;
+    gap: 0.5rem;
+  }
+  .btn-flirt, .btn-leave {
+    flex: 1;
+    justify-content: center;
+    padding: 0.5rem 0.75rem;
   }
   .brand-name {
     font-size: 1.2rem;
@@ -1087,13 +1128,6 @@ body {
   .brand-icon {
     padding: 0.35rem;
     border-radius: 8px;
-  }
-  .header-actions {
-    gap: 0.4rem;
-  }
-  .user-status-pill {
-    padding: 0.35rem 0.65rem;
-    font-size: 0.75rem;
   }
   .movie-title-row {
     flex-direction: column;
@@ -1119,25 +1153,7 @@ body {
 
 @media (max-width: 640px) {
   .app-header {
-    padding: 0.6rem 0.75rem;
-  }
-  .watching-prefix {
-    display: none;
-  }
-  .flirt-btn-text::before {
-    content: "Flirt";
-  }
-  .flirt-btn-text {
-    font-size: 0;
-  }
-  .leave-btn-text::before {
-    content: "Leave";
-  }
-  .leave-btn-text {
-    font-size: 0;
-  }
-  .flirt-btn-text::before, .leave-btn-text::before {
-    font-size: 0.75rem;
+    padding: 0.65rem 0.75rem;
   }
   .main-content {
     padding: 0.75rem;
