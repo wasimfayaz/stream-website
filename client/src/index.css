@@ -297,6 +297,8 @@ body {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
+  flex-shrink: 0;
+  min-height: 280px;
   background: #000000;
   border-radius: var(--radius-lg);
   overflow: hidden;
