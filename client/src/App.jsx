@@ -523,7 +523,8 @@ function App() {
         isLocalFile: true
       });
       
-      if (socket && (syncP2PMode || !currentVideo || currentVideo.title !== file.name)) {
+      // Only emit video_change to the server if we are the initiator (syncP2PMode enabled)
+      if (socket && syncP2PMode) {
         const localMovie = {
           id: 'local-p2p-' + Date.now(),
           title: file.name,
@@ -619,9 +620,9 @@ function App() {
   };
 
   // Determine current video source
-  const videoSourceUrl = (localFile && currentVideo.title === localFile.name)
+  const videoSourceUrl = (localFile && (currentVideo.isLocalFile || currentVideo.url === 'p2p-local'))
     ? localFileUrl
-    : (currentVideo.url 
+    : (currentVideo.url && currentVideo.url !== 'p2p-local'
         ? (currentVideo.url.startsWith('/') 
             ? `${SOCKET_URL}${currentVideo.url}` 
             : currentVideo.url) 
@@ -749,7 +750,7 @@ function App() {
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.25rem' }}>{partnerUpload.username} is sending <strong>{partnerUpload.fileName}</strong> to the theater...</p>
                 </div>
               </div>
-            ) : (currentVideo && currentVideo.url === 'p2p-local' && (!localFile || localFile.name !== currentVideo.title)) ? (
+            ) : (currentVideo && currentVideo.url === 'p2p-local' && !localFile) ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '1.5rem', padding: '2rem', background: '#0e0b16', color: 'white' }} onDragOver={handleDragOver} onDrop={handleDrop} onClick={() => fileInputRef.current?.click()}>
                 <FileVideo size={48} color="var(--primary)" />
                 <div style={{ textAlign: 'center' }}>
