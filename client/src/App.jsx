@@ -23,43 +23,7 @@ import {
 
 const SOCKET_URL = import.meta.env.VITE_WS_URL || (import.meta.env.DEV ? 'http://localhost:5000' : window.location.origin);
 
-const DEFAULT_MOVIES = [
-  {
-    id: 'sintel',
-    title: 'Sintel',
-    url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
-    description: 'A beautiful open-source fantasy film by the Blender Foundation. Sintel is a young woman who searches for a baby dragon she befriended.',
-    thumbnail: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&auto=format&fit=crop&q=60'
-  },
-  {
-    id: 'tears-of-steel',
-    title: 'Tears of Steel',
-    url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
-    description: 'A science-fiction movie set in Amsterdam, exploring a dystopian future where giant combat robots roam and a group of scientists try to save the city.',
-    thumbnail: 'https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=500&auto=format&fit=crop&q=60'
-  },
-  {
-    id: 'big-buck-bunny',
-    title: 'Big Buck Bunny',
-    url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-    description: 'A large and lovable rabbit deals with harassing forest creatures in this iconic open-source animation classic.',
-    thumbnail: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=500&auto=format&fit=crop&q=60'
-  },
-  {
-    id: 'elephants-dream',
-    title: 'Elephants Dream',
-    url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-    description: 'A surreal world of giant machines, pipes and mechanisms, where two characters explore the limits of their digital playground.',
-    thumbnail: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=500&auto=format&fit=crop&q=60'
-  },
-  {
-    id: 'cosmic-laundromat',
-    title: 'Cosmos Laundromat',
-    url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Subway.mp4',
-    description: 'On a desolate island, a suicidal sheep meets a quirky washing machine salesman who offers him a trip through different worlds.',
-    thumbnail: 'https://images.unsplash.com/photo-1524413840807-0c3cb6fa808d?w=500&auto=format&fit=crop&q=60'
-  }
-];
+const DEFAULT_MOVIES = [];
 
 const REACTIONS = ['❤️', '😂', '😮', '🔥', '🍿', '😢'];
 
@@ -91,9 +55,15 @@ function App() {
   const [users, setUsers] = useState([]);
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
-  const [currentVideo, setCurrentVideo] = useState(DEFAULT_MOVIES[0]);
+  const [currentVideo, setCurrentVideo] = useState({
+    id: 'welcome',
+    title: 'No movie loaded yet',
+    url: '',
+    description: 'Select the Local Sync File or Custom URL tab below to stream together.',
+    isLocalFile: false
+  });
   const [reactions, setReactions] = useState([]);
-  const [activeTab, setActiveTab] = useState('library'); // library, custom, local
+  const [activeTab, setActiveTab] = useState('local'); // local, custom
   const [customTitle, setCustomTitle] = useState('');
   const [customUrl, setCustomUrl] = useState('');
   
@@ -104,6 +74,7 @@ function App() {
   const [partnerUpload, setPartnerUpload] = useState(null);
   const [syncP2PMode, setSyncP2PMode] = useState(false);
   const [flirtyQuote, setFlirtyQuote] = useState('');
+  const [hasConfirmedFile, setHasConfirmedFile] = useState(false);
   
   // Custom Player States
   const [isPlaying, setIsPlaying] = useState(false);
@@ -212,6 +183,7 @@ function App() {
       newSocket.on('video_changed', (video) => {
         setPartnerUpload(null); // Reset progress
         setCurrentVideo(video);
+        setHasConfirmedFile(false);
         setIsPlaying(false);
         setCurrentTime(0);
         if (videoRef.current) {
@@ -564,6 +536,7 @@ function App() {
     setLocalFile(file);
     const objectUrl = URL.createObjectURL(file);
     setLocalFileUrl(objectUrl);
+    setHasConfirmedFile(true);
     
     // If syncP2PMode is active OR if the room is currently expecting a local P2P sync file
     if (syncP2PMode || (currentVideo && currentVideo.url === 'p2p-local')) {
@@ -824,7 +797,7 @@ function App() {
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.25rem' }}>{partnerUpload.username} is sending <strong>{partnerUpload.fileName}</strong> to the theater...</p>
                 </div>
               </div>
-            ) : (currentVideo && currentVideo.url === 'p2p-local' && !localFile) ? (
+            ) : (currentVideo && currentVideo.url === 'p2p-local' && (!localFile || !hasConfirmedFile)) ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '1.5rem', padding: '2rem', background: '#0e0b16', color: 'white' }} onDragOver={handleDragOver} onDrop={handleDrop} onClick={() => fileInputRef.current?.click()}>
                 <FileVideo size={48} color="var(--primary)" />
                 <div style={{ textAlign: 'center' }}>
@@ -971,10 +944,10 @@ function App() {
           <div className="movie-catalog-section">
             <div className="section-header-tabs">
               <button 
-                className={`tab-btn ${activeTab === 'library' ? 'active' : ''}`}
-                onClick={() => setActiveTab('library')}
+                className={`tab-btn ${activeTab === 'local' ? 'active' : ''}`}
+                onClick={() => setActiveTab('local')}
               >
-                Movie Library
+                Local Sync File
               </button>
               <button 
                 className={`tab-btn ${activeTab === 'custom' ? 'active' : ''}`}
@@ -982,31 +955,7 @@ function App() {
               >
                 Custom URL
               </button>
-              <button 
-                className={`tab-btn ${activeTab === 'local' ? 'active' : ''}`}
-                onClick={() => setActiveTab('local')}
-              >
-                Local Sync File
-              </button>
             </div>
-
-            {activeTab === 'library' && (
-              <div className="movies-grid">
-                {DEFAULT_MOVIES.map(movie => (
-                  <div 
-                    key={movie.id} 
-                    className={`movie-thumbnail-card ${currentVideo.id === movie.id ? 'active' : ''}`}
-                    onClick={() => selectLibraryMovie(movie)}
-                  >
-                    <img src={movie.thumbnail} alt={movie.title} />
-                    <div className="movie-thumbnail-overlay">
-                      <div className="movie-thumbnail-title">{movie.title}</div>
-                      <div className="movie-thumbnail-duration">Click to play together</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
 
             {activeTab === 'custom' && (
               <form onSubmit={handleCustomUrlSubmit} className="custom-source-form">
