@@ -85,6 +85,7 @@ function App() {
   const [localFileUrl, setLocalFileUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [partnerUpload, setPartnerUpload] = useState(null);
+  const [syncP2PMode, setSyncP2PMode] = useState(false);
   
   // Custom Player States
   const [isPlaying, setIsPlaying] = useState(false);
@@ -508,12 +509,36 @@ function App() {
   };
 
   const loadLocalFile = (file) => {
-    setIsUploading(true);
     setLocalFile(file);
-    
-    // Instantly play locally for host
     const objectUrl = URL.createObjectURL(file);
     setLocalFileUrl(objectUrl);
+    
+    // If syncP2PMode is active OR if the room is currently expecting a local P2P sync file
+    if (syncP2PMode || (currentVideo && currentVideo.url === 'p2p-local')) {
+      setCurrentVideo({
+        id: 'local-p2p-' + Date.now(),
+        title: file.name,
+        url: 'p2p-local',
+        description: 'Synchronized local file playback.',
+        isLocalFile: true
+      });
+      
+      if (socket && (syncP2PMode || !currentVideo || currentVideo.title !== file.name)) {
+        const localMovie = {
+          id: 'local-p2p-' + Date.now(),
+          title: file.name,
+          url: 'p2p-local',
+          description: `Direct Local File Sync. Please select your copy of "${file.name}" to watch together.`,
+          isLocalFile: true
+        };
+        socket.emit('video_change', { roomId, video: localMovie, username });
+      }
+      triggerSyncToast('Local file synced successfully!');
+      return;
+    }
+    
+    // Fallback to standard cloud server upload mode:
+    setIsUploading(true);
     
     setCurrentVideo({
       id: 'local-' + Date.now(),
@@ -724,6 +749,20 @@ function App() {
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.25rem' }}>{partnerUpload.username} is sending <strong>{partnerUpload.fileName}</strong> to the theater...</p>
                 </div>
               </div>
+            ) : (currentVideo && currentVideo.url === 'p2p-local' && (!localFile || localFile.name !== currentVideo.title)) ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '1.5rem', padding: '2rem', background: '#0e0b16', color: 'white' }} onDragOver={handleDragOver} onDrop={handleDrop} onClick={() => fileInputRef.current?.click()}>
+                <FileVideo size={48} color="var(--primary)" />
+                <div style={{ textAlign: 'center' }}>
+                  <p style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>Local Sync File Required</p>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.5rem', lineHeight: '1.4' }}>
+                    The host is watching a local file: <strong>{currentVideo.title}</strong>.<br />
+                    Please drag & drop or click here to select your copy of this movie to watch together.
+                  </p>
+                  <button className="tab-btn active" style={{ marginTop: '1.25rem', padding: '0.5rem 1.25rem', display: 'inline-block', borderRadius: 'var(--radius-md)' }}>
+                    Select Copy of {currentVideo.title}
+                  </button>
+                </div>
+              </div>
             ) : videoSourceUrl ? (
               <video
                 ref={videoRef}
@@ -929,6 +968,22 @@ function App() {
                   Have a movie file downloaded on your computer? Select it below to stream it directly from your machine!
                   The file will be instantly uploaded to your local server, allowing your partner to stream the video directly from your computer in real-time.
                 </p>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.25rem', padding: '0.75rem', background: 'rgba(255,255,255,0.03)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-light)' }}>
+                  <input 
+                    type="checkbox" 
+                    id="sync-p2p" 
+                    checked={syncP2PMode} 
+                    onChange={(e) => setSyncP2PMode(e.target.checked)}
+                    style={{ width: '16px', height: '16px', accentColor: 'var(--primary)', cursor: 'pointer' }}
+                  />
+                  <label htmlFor="sync-p2p" style={{ fontSize: '0.9rem', cursor: 'pointer', userSelect: 'none' }}>
+                    <strong>Sync locally downloaded copies (Skip Upload / Instant play)</strong>
+                    <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.1rem' }}>
+                      Recommended! Both select your copy of the file on your respective devices. Zero waiting, zero upload buffering.
+                    </span>
+                  </label>
+                </div>
                 
                 <input 
                   type="file" 
