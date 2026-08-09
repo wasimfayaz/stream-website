@@ -668,8 +668,16 @@ app.post('/api/upload', (req, res) => {
 });
 
 // Stream uploaded local file with full HTTP Byte-Range Requests support
-app.get('/api/video', (req, res) => {
+app.get('/api/video', async (req, res) => {
   const filePath = path.join(__dirname, 'temp_video.mp4');
+
+  // If file doesn't exist yet, wait up to 1.5s for upload request to initialize file
+  let attempts = 0;
+  while (!fs.existsSync(filePath) && activeUpload && activeUpload.isUploading && attempts < 15) {
+    await new Promise(r => setTimeout(r, 100));
+    attempts++;
+  }
+
   if (!fs.existsSync(filePath)) {
     return res.status(404).send('No video uploaded yet');
   }
@@ -681,7 +689,17 @@ app.get('/api/video', (req, res) => {
     return res.status(404).send('Video file unreadable');
   }
 
-  const currentSize = stat.size;
+  let currentSize = stat.size;
+  // If 0 bytes written, wait up to 1.5s for initial data chunk
+  attempts = 0;
+  while (currentSize === 0 && activeUpload && activeUpload.isUploading && attempts < 15) {
+    await new Promise(r => setTimeout(r, 100));
+    try {
+      currentSize = fs.statSync(filePath).size;
+    } catch (e) {}
+    attempts++;
+  }
+
   if (currentSize === 0) {
     res.setHeader('Retry-After', '1');
     return res.status(503).send('Video buffer initializing...');
@@ -695,10 +713,13 @@ app.get('/api/video', (req, res) => {
     ? activeUpload.mimeType
     : 'video/mp4';
 
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Accept-Ranges', 'bytes');
+
   const range = req.headers.range;
 
   if (!range) {
-    // Standard full stream (or when browser does not pass Range header)
+    // Standard full stream
     res.writeHead(200, {
       'Content-Length': currentSize,
       'Content-Type': mimeType,
@@ -712,14 +733,26 @@ app.get('/api/video', (req, res) => {
   const start = parseInt(parts[0], 10);
   let end = parts[1] ? parseInt(parts[1], 10) : totalSize - 1;
 
-  if (isNaN(start) || start < 0 || start >= totalSize) {
+  if (isNaN(start) || start < 0) {
     res.setHeader('Content-Range', `bytes */${totalSize}`);
     return res.status(416).send('Requested range not satisfiable');
   }
 
+  // If requested start is past currently written disk bytes, wait up to 1.5s for bytes to arrive
+  if (start >= currentSize && activeUpload && activeUpload.isUploading) {
+    attempts = 0;
+    while (start >= currentSize && activeUpload && activeUpload.isUploading && attempts < 15) {
+      await new Promise(r => setTimeout(r, 100));
+      try {
+        currentSize = fs.statSync(filePath).size;
+      } catch (e) {}
+      attempts++;
+    }
+  }
+
   // Cap requested end to current bytes written on disk for growing uploads
   if (end >= currentSize) {
-    end = currentSize - 1;
+    end = Math.max(start, currentSize - 1);
   }
 
   if (start > end) {

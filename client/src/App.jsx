@@ -322,8 +322,8 @@ function App() {
           videoRef.current.currentTime = 0;
           videoRef.current.pause();
         }
-        // If it's a local file, reset client local file state unless they already loaded it
-        if (!video.isLocalFile) {
+        // Only reset local file state if this client is NOT the uploader with a local blob URL
+        if (!video.isLocalFile && video.uploaderName !== username && !localFileUrl) {
           setLocalFile(null);
           setLocalFileUrl('');
         }
@@ -921,6 +921,7 @@ function App() {
         id: 'local-' + fileId,
         title: file.name,
         url: videoStreamUrl,
+        uploaderName: username,
         description: `Streaming directly from ${username}'s local storage.`,
         isLocalFile: false
       };
@@ -986,10 +987,23 @@ function App() {
     window.location.href = window.location.pathname; // Reload back to lobby
   };
 
+  // Video error retry handler
+  const handleVideoError = (e) => {
+    console.warn('Video stream initializing/buffering, retrying...', e);
+    setIsBuffering(true);
+    if (currentVideo && currentVideo.url && currentVideo.url.includes('/api/video')) {
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.load();
+        }
+      }, 1200);
+    }
+  };
+
   // Determine current video source (for HTML5 <video> tag)
   const videoSourceUrl = currentVideo.isIframe 
     ? '' 
-    : (localFile && (currentVideo.isLocalFile || currentVideo.url === 'p2p-local'))
+    : ((localFile || localFileUrl) && (currentVideo.isLocalFile || currentVideo.url === 'p2p-local' || currentVideo.uploaderName === username))
       ? localFileUrl
       : (currentVideo.url && currentVideo.url !== 'p2p-local'
           ? (currentVideo.url.startsWith('/') 
@@ -1060,7 +1074,7 @@ function App() {
       <header className="floating-pill-header">
         <div className="header-nav-row">
           <a href="/" className="header-brand" onClick={(e) => { e.preventDefault(); handleLeaveRoom(); }}>
-            <span>M</span>
+            <span>WE</span>
           </a>
           <div className="pill-nav-links">
             <span className={`pill-nav-link ${activeTab === 'movies' ? 'active' : ''}`} onClick={() => setActiveTab('movies')}>
@@ -1107,7 +1121,7 @@ function App() {
       <div className="mobile-top-bar">
         <div className="mobile-top-left">
           <a href="/" className="header-brand" onClick={(e) => { e.preventDefault(); handleLeaveRoom(); }}>
-            <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--primary)' }}>M</span>
+            <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--primary)' }}>WE</span>
           </a>
           <div className="status-dot" style={{ backgroundColor: joinedRoom ? 'var(--primary)' : 'var(--text-muted)' }}></div>
           <span style={{ fontWeight: 600, fontSize: '0.8rem' }}>
@@ -1253,6 +1267,7 @@ function App() {
                 onPlaying={() => setIsBuffering(false)}
                 onCanPlay={() => setIsBuffering(false)}
                 onStalled={() => setIsBuffering(true)}
+                onError={handleVideoError}
                 preload="auto"
                 muted={isMuted}
               />
