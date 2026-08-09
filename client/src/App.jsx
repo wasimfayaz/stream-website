@@ -17,6 +17,7 @@ import {
   Copy,
   Link,
   RefreshCw,
+  Clock,
   Trash2,
   Heart,
   Search
@@ -624,6 +625,37 @@ function App() {
     }
   };
 
+  // Sync Stamps: programmatically force seeking both player timelines to the exact current timestamp of the initiator
+  const syncTimestamps = () => {
+    if (!socket) return;
+    
+    if (currentVideo && currentVideo.isIframe) {
+      // Reload iframe embed streams with a fresh synchronization key
+      socket.emit('video_change', { 
+        roomId, 
+        video: { ...currentVideo, syncKey: Date.now() }, 
+        username 
+      });
+      triggerSyncToast('Synced video stream loading state!');
+    } else if (videoRef.current) {
+      const time = videoRef.current.currentTime;
+      
+      // Emit seek event
+      socket.emit('media_seek', { roomId, currentTime: time, username });
+      
+      // Also sync play/pause states to match initiator
+      if (videoRef.current.paused) {
+        socket.emit('media_pause', { roomId, username });
+      } else {
+        socket.emit('media_play', { roomId, currentTime: time, username });
+      }
+      
+      triggerSyncToast(`Synced stamp to ${formatTime(time)}!`);
+    } else {
+      triggerSyncToast('No video is active to synchronize timestamps.');
+    }
+  };
+
   // Custom Notifications / Visual feedback
   const triggerSyncToast = (text) => {
     setSyncToast(text);
@@ -1093,9 +1125,16 @@ function App() {
                   {currentVideo.isLocalFile ? 'Watch together via matching local files' : currentVideo.isCustom ? 'Custom network URL' : 'Curated Library'}
                 </p>
               </div>
-              <button className="btn-action-sync" onClick={requestSync}>
-                <RefreshCw size={14} /> Synchronize Room
-              </button>
+              {joinedRoom && (
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <button className="btn-action-sync" onClick={requestSync} title="Request full synchronization from host">
+                    <RefreshCw size={14} /> Sync Room
+                  </button>
+                  <button className="btn-action-sync" onClick={syncTimestamps} style={{ background: 'var(--primary)', color: '#ffffff', border: 'none' }} title="Force-sync current time stamp to partner">
+                    <Clock size={14} /> Sync Stamps
+                  </button>
+                </div>
+              )}
             </div>
             <p className="movie-desc">{currentVideo.description}</p>
           </div>
