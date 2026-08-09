@@ -31,8 +31,9 @@ const MOVIE_SERVERS = [
   { id: '2embed', name: 'Server 1 (2Embed - Original English HD)', getUrl: (imdbId) => `https://www.2embed.cc/embed/${imdbId}` },
   { id: 'vidsrc_cc', name: 'Server 2 (VidSrc CC - Pure English Track)', getUrl: (imdbId) => `https://vidsrc.cc/v2/embed/movie/${imdbId}` },
   { id: 'vidsrc_net', name: 'Server 3 (VidSrc NET - Global English)', getUrl: (imdbId) => `https://vidsrc.net/embed/movie/${imdbId}` },
-  { id: 'vidsrc_me', name: 'Server 4 (VidSrc ME - English Audio)', getUrl: (imdbId) => `https://vidsrc.me/embed/movie?imdb=${imdbId}` },
-  { id: 'moviesapi', name: 'Server 5 (MoviesAPI - Global English Mirror)', getUrl: (imdbId) => `https://moviesapi.club/movie/${imdbId}` }
+  { id: 'vidsrc_me', name: 'Server 4 (VidSrc ME - English Audio)', getUrl: (imdbId) => `https://vidsrc.me/embed/movie?imdb=${imdbId}&lang=en` },
+  { id: 'moviesapi', name: 'Server 5 (MoviesAPI - Global English Mirror)', getUrl: (imdbId) => `https://moviesapi.club/movie/${imdbId}` },
+  { id: 'autoembed', name: 'Server 6 (AutoEmbed - Forced English)', getUrl: (imdbId) => `https://player.autoembed.cc/embed/movie/${imdbId}?lang=en` }
 ];
 
 const POPULAR_MOVIES = [
@@ -1190,6 +1191,11 @@ function App() {
                       ))}
                     </select>
                   </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.25)', padding: '0.6rem 0.85rem', borderRadius: 'var(--radius-sm)', color: '#93c5fd', fontSize: '0.825rem', marginBottom: '1.25rem' }}>
+                  <Volume2 size={18} color="#60a5fa" style={{ flexShrink: 0 }} />
+                  <span><strong>Audio & Language Options:</strong> You can select <strong>English Audio</strong> inside the player by clicking the <strong>⚙️ Settings Gear</strong> or <strong>💬 Audio/CC Icon</strong> in the bottom right corner of the video screen!</span>
                 </div>
 
                 <div className="movies-grid">
