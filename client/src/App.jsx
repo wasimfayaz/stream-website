@@ -23,10 +23,19 @@ import {
   Search,
   Upload,
   Globe,
-  LogOut
+  LogOut,
+  Bookmark,
+  HeartHandshake,
+  History
 } from 'lucide-react';
+import AuthModal from './components/AuthModal';
+import WatchlistSection from './components/WatchlistSection';
+import MemoriesSection from './components/MemoriesSection';
+import HistorySection from './components/HistorySection';
 
 const SOCKET_URL = import.meta.env.VITE_WS_URL || (import.meta.env.DEV ? 'http://localhost:5000' : window.location.origin);
+const API_BASE = import.meta.env.DEV ? 'http://localhost:5000' : window.location.origin;
+
 
 const DEFAULT_MOVIES = [];
 
@@ -89,14 +98,82 @@ const FLIRTY_QUOTES = [
 ];
 
 function App() {
+  // Auth & Couple Space States
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
   // Lobby States
   const [roomIdInput, setRoomIdInput] = useState('');
   const [username, setUsername] = useState(() => localStorage.getItem('streaam_username') || '');
   const [joinedRoom, setJoinedRoom] = useState(false);
   const [roomId, setRoomId] = useState('');
-  
+
+  // Verify Auth session on load
+  useEffect(() => {
+    const token = localStorage.getItem('streaam_token');
+    if (!token) {
+      setAuthLoading(false);
+      return;
+    }
+
+    fetch(`${API_BASE}/api/auth/me`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(user => {
+        if (user && user.id) {
+          setCurrentUser(user);
+          if (user.username) setUsername(user.username);
+          if (user.couple && user.couple.inviteCode) {
+            setRoomId(user.couple.inviteCode);
+            setJoinedRoom(true);
+          }
+        } else {
+          localStorage.removeItem('streaam_token');
+        }
+      })
+      .catch(err => {
+        console.error('Auth verification error:', err);
+      })
+      .finally(() => setAuthLoading(false));
+  }, []);
+
+  const handleAuthSuccess = (user) => {
+    setCurrentUser(user);
+    if (user.username) setUsername(user.username);
+    if (user.couple && user.couple.inviteCode) {
+      setRoomId(user.couple.inviteCode);
+      setJoinedRoom(true);
+    }
+  };
+
+  // Fetch Persistent Chat History when currentUser is authenticated
+  useEffect(() => {
+    if (currentUser && currentUser.coupleId) {
+      const token = localStorage.getItem('streaam_token');
+      fetch(`${API_BASE}/api/chat`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+        .then(res => res.json())
+        .then(dbMsgs => {
+          if (Array.isArray(dbMsgs) && dbMsgs.length > 0) {
+            setMessages(dbMsgs);
+          }
+        })
+        .catch(err => console.error('Failed to load chat history:', err));
+    }
+  }, [currentUser]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('streaam_token');
+    setCurrentUser(null);
+    setJoinedRoom(false);
+    window.location.reload();
+  };
+
   // App States
   const [socket, setSocket] = useState(null);
+
   const [users, setUsers] = useState([]);
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
@@ -915,6 +992,10 @@ function App() {
 
   return (
     <>
+      {(!currentUser || !currentUser.coupleId) && !authLoading && (
+        <AuthModal onAuthSuccess={handleAuthSuccess} initialUser={currentUser} />
+      )}
+
       <header className="floating-pill-header">
         <div className="header-nav-row">
           <a href="/" className="header-brand" onClick={(e) => { e.preventDefault(); leaveRoom(); }}>
@@ -929,22 +1010,36 @@ function App() {
             </span>
             <span className={`pill-nav-link ${activeTab === 'local' ? 'active' : ''}`} onClick={() => setActiveTab('local')}>Upload & Stream</span>
             <span className={`pill-nav-link ${activeTab === 'custom' ? 'active' : ''}`} onClick={() => setActiveTab('custom')}>Custom URL</span>
+            <span className={`pill-nav-link ${activeTab === 'watchlist' ? 'active' : ''}`} onClick={() => setActiveTab('watchlist')}>
+              <Bookmark size={14} /> Watchlist
+            </span>
+            <span className={`pill-nav-link ${activeTab === 'history' ? 'active' : ''}`} onClick={() => setActiveTab('history')}>
+              <History size={14} /> History
+            </span>
+            <span className={`pill-nav-link ${activeTab === 'memories' ? 'active' : ''}`} onClick={() => setActiveTab('memories')}>
+              <HeartHandshake size={14} /> Memories
+            </span>
           </div>
         </div>
 
         <div className="header-actions-row">
-          {joinedRoom && (
+          {currentUser && (
             <button 
-              onClick={leaveRoom} 
+              onClick={handleLogout} 
               className="btn-leave-room"
+              style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}
             >
-              Leave Room
+              <LogOut size={14} /> Sign Out
             </button>
           )}
           
           <div className="user-status-pill">
             <div className="status-dot" style={{ backgroundColor: joinedRoom ? 'var(--primary)' : 'var(--text-muted)' }}></div>
-            <span>Edilyn & Wasim</span>
+            <span>
+              {currentUser?.partner 
+                ? `${currentUser.username} & ${currentUser.partner.username}` 
+                : (currentUser?.username || 'Edilyn & Wasim')}
+            </span>
           </div>
         </div>
       </header>
@@ -953,8 +1048,13 @@ function App() {
       <div className="mobile-top-bar">
         <div className="mobile-top-left">
           <div className="status-dot" style={{ backgroundColor: joinedRoom ? 'var(--primary)' : 'var(--text-muted)' }}></div>
-          <span>Edilyn & Wasim</span>
+          <span>
+            {currentUser?.partner 
+              ? `${currentUser.username} & ${currentUser.partner.username}` 
+              : (currentUser?.username || 'Edilyn & Wasim')}
+          </span>
         </div>
+
         {joinedRoom && (
           <button className="btn-leave-room" onClick={leaveRoom}>
             <LogOut size={12} /> Leave
@@ -1458,6 +1558,18 @@ function App() {
                   </div>
                 )}
               </div>
+            )}
+
+            {activeTab === 'watchlist' && (
+              <WatchlistSection />
+            )}
+
+            {activeTab === 'history' && (
+              <HistorySection />
+            )}
+
+            {activeTab === 'memories' && (
+              <MemoriesSection />
             )}
           </div>
         </div>

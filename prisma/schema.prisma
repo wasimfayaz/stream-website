@@ -1,0 +1,101 @@
+// Prisma Schema for StreaamSync Permanent Couple Space
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String          @id @default(uuid())
+  email         String          @unique
+  username      String
+  passwordHash  String
+  avatarUrl     String?
+  coupleId      String?
+  couple        Couple?         @relation(fields: [coupleId], references: [id])
+  messages      Message[]
+  watchlist     WatchlistItem[]
+  ratings       Rating[]
+  memories      Memory[]
+  createdAt     DateTime        @default(now())
+}
+
+model Couple {
+  id             String          @id @default(uuid())
+  inviteCode     String          @unique
+  anniversary    DateTime?
+  users          User[]
+  watchSessions  WatchSession[]
+  messages       Message[]
+  watchlist      WatchlistItem[]
+  memories       Memory[]
+  createdAt      DateTime        @default(now())
+}
+
+model WatchSession {
+  id             String          @id @default(uuid())
+  coupleId       String
+  couple         Couple          @relation(fields: [coupleId], references: [id])
+  movieTitle     String
+  videoUrl       String
+  posterUrl      String?
+  sourceType     String          // 'catalog', 'custom', 'upload'
+  lastPosition   Float           @default(0) // Seconds (for Continue Watching)
+  duration       Float           @default(0)
+  isCompleted    Boolean         @default(false)
+  startedAt      DateTime        @default(now())
+  endedAt        DateTime?
+  ratings        Rating[]
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  coupleId   String
+  couple     Couple   @relation(fields: [coupleId], references: [id])
+  senderId   String
+  sender     User     @relation(fields: [senderId], references: [id])
+  text       String
+  isSystem   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
+
+model WatchlistItem {
+  id         String   @id @default(uuid())
+  coupleId   String
+  couple     Couple   @relation(fields: [coupleId], references: [id])
+  addedById  String
+  addedBy    User     @relation(fields: [addedById], references: [id])
+  imdbId     String?
+  title      String
+  posterUrl  String?
+  status     String   @default("WANT_TO_WATCH") // WANT_TO_WATCH, WATCHING, WATCHED
+  createdAt  DateTime @default(now())
+}
+
+model Rating {
+  id             String       @id @default(uuid())
+  watchSessionId String
+  watchSession   WatchSession @relation(fields: [watchSessionId], references: [id])
+  userId         String
+  user           User         @relation(fields: [userId], references: [id])
+  stars          Int          // 1 to 5 stars
+  review         String?
+  createdAt      DateTime     @default(now())
+}
+
+model Memory {
+  id           String   @id @default(uuid())
+  coupleId     String
+  couple       Couple   @relation(fields: [coupleId], references: [id])
+  uploadedById String
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id])
+  mediaUrl     String   // S3 / Cloudinary URL or local relative path
+  mediaType    String   // 'IMAGE' or 'VIDEO'
+  caption      String?
+  memoryDate   DateTime
+  createdAt    DateTime @default(now())
+}

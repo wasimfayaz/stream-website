@@ -14,9 +14,16 @@
     "build": "npm --prefix client install && npm run build:client"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "bcryptjs": "^3.0.3",
     "concurrently": "^8.2.2",
     "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
     "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.3",
     "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "prisma": "^6.19.3"
   }
 }
