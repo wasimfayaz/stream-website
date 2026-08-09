@@ -929,15 +929,20 @@ function App() {
             )}
 
             {currentVideo.isIframe ? (
-              <iframe 
-                src={currentVideo.url}
-                className="video-element-iframe"
-                allowFullScreen
-                allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-                referrerPolicy="no-referrer"
-                title={currentVideo.title}
-                style={{ width: '100%', height: '100%', border: 'none', background: '#000' }}
-              />
+              <>
+                <div style={{ position: 'absolute', top: '12px', left: '12px', zIndex: 40, background: 'rgba(11, 19, 36, 0.75)', backdropFilter: 'blur(4px)', color: 'var(--text-muted)', padding: '0.35rem 0.6rem', borderRadius: 'var(--radius-sm)', fontSize: '0.75rem', pointerEvents: 'none', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  Stuck loading? Disable Adblocker / Brave Shields
+                </div>
+                <iframe 
+                  src={currentVideo.url}
+                  className="video-element-iframe"
+                  allowFullScreen
+                  allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                  referrerPolicy="origin"
+                  title={currentVideo.title}
+                  style={{ width: '100%', height: '100%', border: 'none', background: '#000' }}
+                />
+              </>
             ) : partnerUpload ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '1.5rem', padding: '2rem', background: '#050b14', color: 'white' }}>
                 <div style={{ position: 'relative', width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
