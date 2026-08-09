@@ -246,7 +246,13 @@ function App() {
 
       newSocket.on('room_state', (state) => {
         setUsers(state.users);
-        setMessages(state.messages);
+        if (state.messages && state.messages.length > 0) {
+          setMessages(prev => {
+            const existingIds = new Set(prev.map(m => m.id));
+            const newMsgs = state.messages.filter(m => m && m.id && !existingIds.has(m.id));
+            return [...prev, ...newMsgs];
+          });
+        }
         setCurrentVideo(state.currentVideo);
         
         // Sync player initial state
@@ -1065,32 +1071,32 @@ function App() {
       {/* Mobile-only bottom navigation */}
       <nav className="mobile-bottom-nav">
         <button 
-          className={`mobile-nav-item ${activeTab === 'movies' ? 'active' : ''}`}
+          className={`mobile-nav-item ${['movies', 'watch-together', 'local', 'custom'].includes(activeTab) ? 'active' : ''}`}
           onClick={() => setActiveTab('movies')}
         >
           <Film size={20} />
-          <span>Home</span>
+          <span>Theater</span>
         </button>
         <button 
-          className={`mobile-nav-item ${activeTab === 'watch-together' ? 'active' : ''}`}
-          onClick={() => setActiveTab('watch-together')}
+          className={`mobile-nav-item ${activeTab === 'watchlist' ? 'active' : ''}`}
+          onClick={() => setActiveTab('watchlist')}
         >
-          <Users size={20} />
-          <span>Together</span>
+          <Bookmark size={20} />
+          <span>Watchlist</span>
         </button>
         <button 
-          className={`mobile-nav-item ${activeTab === 'local' ? 'active' : ''}`}
-          onClick={() => setActiveTab('local')}
+          className={`mobile-nav-item ${activeTab === 'history' ? 'active' : ''}`}
+          onClick={() => setActiveTab('history')}
         >
-          <Upload size={20} />
-          <span>Upload</span>
+          <History size={20} />
+          <span>History</span>
         </button>
         <button 
-          className={`mobile-nav-item ${activeTab === 'custom' ? 'active' : ''}`}
-          onClick={() => setActiveTab('custom')}
+          className={`mobile-nav-item ${activeTab === 'memories' ? 'active' : ''}`}
+          onClick={() => setActiveTab('memories')}
         >
-          <Globe size={20} />
-          <span>URL</span>
+          <HeartHandshake size={20} />
+          <span>Memories</span>
         </button>
       </nav>
 
