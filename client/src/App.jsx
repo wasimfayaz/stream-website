@@ -1356,32 +1356,6 @@ function App() {
 
           {/* CATALOG / SOURCE SELECTOR SECTION */}
           <div className="movie-catalog-section">
-            <div className="section-header-tabs">
-              <button 
-                className={`tab-btn ${activeTab === 'movies' ? 'active' : ''}`}
-                onClick={() => setActiveTab('movies')}
-              >
-                Search & Stream Movies
-              </button>
-              <button 
-                className={`tab-btn ${activeTab === 'watch-together' ? 'active' : ''}`}
-                onClick={() => setActiveTab('watch-together')}
-              >
-                Watch Together
-              </button>
-              <button 
-                className={`tab-btn ${activeTab === 'local' ? 'active' : ''}`}
-                onClick={() => setActiveTab('local')}
-              >
-                Upload & Stream File
-              </button>
-              <button 
-                className={`tab-btn ${activeTab === 'custom' ? 'active' : ''}`}
-                onClick={() => setActiveTab('custom')}
-              >
-                Custom URL
-              </button>
-            </div>
 
             {activeTab === 'watch-together' && !joinedRoom && (
               <div className="lobby-container" style={{ padding: '1rem', width: '100%' }}>
