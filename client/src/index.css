@@ -359,15 +359,19 @@ body {
 /* MOVIE PLAYER SECTION */
 .player-wrapper {
   position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 320px;
+  flex-shrink: 0;
   background: black;
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-lg);
-  aspect-ratio: 16/9;
   border: 1px solid var(--border-light);
 }
 
-.video-element {
+.video-element,
+.video-element-iframe {
   width: 100%;
   height: 100%;
   display: block;
