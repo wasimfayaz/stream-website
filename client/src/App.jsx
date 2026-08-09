@@ -27,20 +27,40 @@ const DEFAULT_MOVIES = [];
 
 const REACTIONS = ['❤️', '😂', '😮', '🔥', '🍿', '😢'];
 
+const MOVIE_SERVERS = [
+  { id: 'vidsrc', name: 'Server 1 (VidSrc)', getUrl: (tmdbId) => `https://vidsrc.to/embed/movie/${tmdbId}` },
+  { id: 'autoembed', name: 'Server 2 (AutoEmbed)', getUrl: (tmdbId) => `https://autoembed.co/movie/tmdb/${tmdbId}` },
+  { id: '2embed', name: 'Server 3 (2Embed)', getUrl: (tmdbId) => `https://www.2embed.cc/embed/${tmdbId}` },
+  { id: 'multiembed', name: 'Server 4 (SuperEmbed)', getUrl: (tmdbId) => `https://multiembed.mov/directstream.php?video_id=${tmdbId}&tmdb=1` }
+];
+
+const POPULAR_MOVIES = [
+  { id: 597, title: 'Titanic', year: '1997', poster: 'https://image.tmdb.org/t/p/w500/9cqN121KmBkWi828D8RStfiHWTo.jpg', overview: 'A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.' },
+  { id: 11036, title: 'The Notebook', year: '2004', poster: 'https://image.tmdb.org/t/p/w500/rNzQIGRG81KScujVJme2cTSu2.jpg', overview: 'An epic love story centered around an older man who reads aloud to an older woman in a nursing home.' },
+  { id: 313369, title: 'La La Land', year: '2016', poster: 'https://image.tmdb.org/t/p/w500/uDO8zWDhfWwo1ikxsRFAZWVvMxs.jpg', overview: 'While navigating their careers in Los Angeles, a pianist and an actress fall in love while attempting to reconcile their aspirations.' },
+  { id: 27205, title: 'Inception', year: '2010', poster: 'https://image.tmdb.org/t/p/w500/oYuLEW9W2vBBGLBocqZXi12xIQp.jpg', overview: 'A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea.' },
+  { id: 19995, title: 'Avatar', year: '2009', poster: 'https://image.tmdb.org/t/p/w500/kyeqWdyUXW608qlYkRqosgbbJyK.jpg', overview: 'A paraplegic Marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home.' },
+  { id: 157336, title: 'Interstellar', year: '2014', poster: 'https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg', overview: 'The adventures of a group of explorers who make use of a newly discovered wormhole to surpass the limitations on human space travel.' },
+  { id: 299536, title: 'Avengers: Infinity War', year: '2018', poster: 'https://image.tmdb.org/t/p/w500/7WsyChLLEzFiDOVTGfaZaE3zRBV.jpg', overview: 'The Avengers and their allies must be willing to sacrifice all in an attempt to defeat the powerful Thanos.' },
+  { id: 550, title: 'Fight Club', year: '1999', poster: 'https://image.tmdb.org/t/p/w500/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg', overview: 'An insomniac office worker and a devil-may-care soap maker form an underground fight club.' }
+];
+
 const FLIRTY_QUOTES = [
-  "Mahal na mahal kita, Baby! ❤️",
-  "Ikaw lang ang aking bituin, Edilyn. ✨",
-  "Baby, ang ganda-ganda mo naman ngayon! 😍",
-  "Kahit malayo tayo, ikaw pa rin ang tibok ng puso ko, aking Baby. 💓",
-  "Napakaswerte ni Wasim sa'yo, Baby ko. 💕",
-  "Walang distansya ang makakahadlang sa pagmamahal natin, Edilyn. 🌍💞",
-  "Miss na miss na kita, Baby. Sobra! 😘",
-  "Ikaw ang aking paboritong sine at habambuhay na makakasama. 🎬❤️",
+  "I love you so much, Baby! ❤️",
+  "You are my whole universe, Edilyn. ✨",
+  "Baby, you look absolutely stunning today! 😍",
+  "No matter the distance, my heart is always with you, Baby. 💓",
+  "Wasim is the luckiest guy in the world to have you, Baby! 💕",
+  "No distance can ever stop our love, Edilyn. 🌍💞",
+  "I miss you so much, Baby! 😘",
+  "You are my favorite movie and my forever partner. 🎬❤️",
   "Wasim ❤️ Edilyn forever and ever!",
-  "Baby, ikaw ang pinakamagandang nangyari sa buhay ko. 💖",
-  "Ang tibok ng puso ko ay para lang sa'yo, Baby Edilyn. 💗",
-  "Bawat segundo kasama ka ay walang katumbas, Baby. 🥰",
-  "Baby, gusto ko habambuhay tayong magkasama manood ng sine. 💑🍿"
+  "Baby, you are the best thing that ever happened to me. 💖",
+  "Every beat of my heart is just for you, Baby Edilyn. 💗",
+  "Every second spent with you is a dream come true, Baby. 🥰",
+  "Baby, I want to watch movies with you forever! 💑🍿",
+  "You stole my heart and I'm never asking for it back, Baby. 💕",
+  "Counting down every second until I can hold you in my arms, Edilyn! ❤️"
 ];
 
 function App() {
@@ -63,9 +83,15 @@ function App() {
     isLocalFile: false
   });
   const [reactions, setReactions] = useState([]);
-  const [activeTab, setActiveTab] = useState('local'); // local, custom
+  const [activeTab, setActiveTab] = useState('movies'); // movies, local, custom
   const [customTitle, setCustomTitle] = useState('');
   const [customUrl, setCustomUrl] = useState('');
+  
+  // Free Movie Search States
+  const [freeMovieQuery, setFreeMovieQuery] = useState('');
+  const [freeSearchResults, setFreeSearchResults] = useState([]);
+  const [isSearchingMovies, setIsSearchingMovies] = useState(false);
+  const [selectedServer, setSelectedServer] = useState('vidsrc');
   
   // Local File States
   const [localFile, setLocalFile] = useState(null);
@@ -280,6 +306,13 @@ function App() {
         }
       });
 
+      newSocket.on('receive_flirt', ({ quote, sender }) => {
+        setFlirtyQuote(quote);
+        setTimeout(() => {
+          setFlirtyQuote('');
+        }, 7000);
+      });
+
       return () => {
         newSocket.disconnect();
       };
@@ -319,10 +352,73 @@ function App() {
 
   const triggerFlirt = () => {
     const randomIndex = Math.floor(Math.random() * FLIRTY_QUOTES.length);
-    setFlirtyQuote(FLIRTY_QUOTES[randomIndex]);
-    setTimeout(() => {
-      setFlirtyQuote('');
-    }, 7000);
+    const quote = FLIRTY_QUOTES[randomIndex];
+    if (socket) {
+      socket.emit('send_flirt', { roomId, quote, sender: username });
+    } else {
+      setFlirtyQuote(quote);
+      setTimeout(() => {
+        setFlirtyQuote('');
+      }, 7000);
+    }
+  };
+
+  // Free Movie Search API Handler
+  const handleMovieSearch = async (e) => {
+    if (e) e.preventDefault();
+    if (!freeMovieQuery.trim()) return;
+    setIsSearchingMovies(true);
+    try {
+      const res = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=15d2aea67154377073f90d96b6495adc&query=${encodeURIComponent(freeMovieQuery)}`);
+      const data = await res.json();
+      if (data.results) {
+        setFreeSearchResults(data.results.filter(m => m.poster_path));
+      }
+    } catch (err) {
+      console.error('Failed to search movies', err);
+    } finally {
+      setIsSearchingMovies(false);
+    }
+  };
+
+  const playFreeMovie = (movie, serverId = selectedServer) => {
+    const serverObj = MOVIE_SERVERS.find(s => s.id === serverId) || MOVIE_SERVERS[0];
+    const embedUrl = serverObj.getUrl(movie.id);
+    const posterUrl = movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : movie.poster;
+    
+    const videoData = {
+      id: `free-movie-${movie.id}`,
+      tmdbId: movie.id,
+      title: movie.title,
+      url: embedUrl,
+      description: movie.overview || `Streaming ${movie.title} on ${serverObj.name}`,
+      isIframe: true,
+      serverId: serverObj.id,
+      poster: posterUrl
+    };
+    
+    setCurrentVideo(videoData);
+    if (socket) {
+      socket.emit('video_change', { roomId, video: videoData, username });
+    }
+  };
+
+  const switchServer = (serverId) => {
+    setSelectedServer(serverId);
+    if (currentVideo && currentVideo.isIframe && currentVideo.tmdbId) {
+      const serverObj = MOVIE_SERVERS.find(s => s.id === serverId) || MOVIE_SERVERS[0];
+      const embedUrl = serverObj.getUrl(currentVideo.tmdbId);
+      const videoData = {
+        ...currentVideo,
+        url: embedUrl,
+        serverId: serverObj.id,
+        description: `Streaming ${currentVideo.title} on ${serverObj.name}`
+      };
+      setCurrentVideo(videoData);
+      if (socket) {
+        socket.emit('video_change', { roomId, video: videoData, username });
+      }
+    }
   };
 
   // Create room helper
@@ -793,7 +889,23 @@ function App() {
         {/* LEFT PANEL: VIDEOPLAYER & CONTROLS, LIBRARY */}
         <div className="main-content">
           <div className="player-wrapper" onDragOver={handleDragOver} onDrop={handleDrop}>
-            {partnerUpload ? (
+            {/* Synchronized Flirt Toast overlay on top of video / inside fullscreen */}
+            {flirtyQuote && (
+              <div className="video-flirt-overlay">
+                {flirtyQuote}
+              </div>
+            )}
+
+            {currentVideo.isIframe ? (
+              <iframe 
+                src={currentVideo.url}
+                className="video-element-iframe"
+                allowFullScreen
+                allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                title={currentVideo.title}
+                style={{ width: '100%', height: '100%', border: 'none', background: '#000' }}
+              />
+            ) : partnerUpload ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '1.5rem', padding: '2rem', background: '#050b14', color: 'white' }}>
                 <div style={{ position: 'relative', width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <div className="status-dot" style={{ width: '60px', height: '60px', borderRadius: '50%', border: '4px dashed var(--primary)', animation: 'spin 2s linear infinite' }}></div>
@@ -951,6 +1063,12 @@ function App() {
           <div className="movie-catalog-section">
             <div className="section-header-tabs">
               <button 
+                className={`tab-btn ${activeTab === 'movies' ? 'active' : ''}`}
+                onClick={() => setActiveTab('movies')}
+              >
+                Search & Stream Movies
+              </button>
+              <button 
                 className={`tab-btn ${activeTab === 'local' ? 'active' : ''}`}
                 onClick={() => setActiveTab('local')}
               >
@@ -963,6 +1081,63 @@ function App() {
                 Custom URL
               </button>
             </div>
+
+            {activeTab === 'movies' && (
+              <div className="free-movies-container">
+                <form onSubmit={handleMovieSearch} className="custom-source-form" style={{ marginBottom: '1.25rem' }}>
+                  <div className="input-row">
+                    <input 
+                      type="text" 
+                      placeholder="Search any movie (e.g. Titanic, Avatar, Inception)..." 
+                      className="form-input"
+                      style={{ paddingLeft: '1rem' }}
+                      value={freeMovieQuery}
+                      onChange={(e) => setFreeMovieQuery(e.target.value)}
+                    />
+                    <button type="submit" className="btn-inline-submit">
+                      {isSearchingMovies ? 'Searching...' : 'Search Movie'}
+                    </button>
+                  </div>
+                </form>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    {freeSearchResults.length > 0 ? `Search Results for "${freeMovieQuery}"` : 'Popular Quick Picks'}
+                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Server:</label>
+                    <select 
+                      value={selectedServer}
+                      onChange={(e) => switchServer(e.target.value)}
+                      style={{ background: '#0f172a', color: 'white', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-sm)', padding: '0.35rem 0.6rem', fontSize: '0.8rem' }}
+                    >
+                      {MOVIE_SERVERS.map(s => (
+                        <option key={s.id} value={s.id}>{s.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="movies-grid">
+                  {(freeSearchResults.length > 0 ? freeSearchResults : POPULAR_MOVIES).map(movie => (
+                    <div 
+                      key={movie.id} 
+                      className="movie-thumbnail-card"
+                      onClick={() => playFreeMovie(movie)}
+                    >
+                      <img 
+                        src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : movie.poster} 
+                        alt={movie.title} 
+                      />
+                      <div className="movie-thumbnail-overlay">
+                        <div className="movie-thumbnail-title">{movie.title}</div>
+                        <div className="movie-thumbnail-duration">▶ Play Free Stream</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {activeTab === 'custom' && (
               <form onSubmit={handleCustomUrlSubmit} className="custom-source-form">

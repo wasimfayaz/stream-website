@@ -110,6 +110,10 @@ io.on('connection', (socket) => {
     io.to(roomId).emit('receive_reaction', { reaction, username, id: Math.random().toString() });
   });
 
+  socket.on('send_flirt', ({ roomId, quote, sender }) => {
+    io.to(roomId).emit('receive_flirt', { quote, sender });
+  });
+
   socket.on('upload_progress', ({ roomId, username, percent, fileName }) => {
     socket.to(roomId).emit('partner_upload_progress', { username, percent, fileName });
   });

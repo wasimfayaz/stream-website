@@ -1182,3 +1182,39 @@ body {
     height: 440px;
   }
 }
+
+/* FLIRTY TEXT OVERLAY ON VIDEO PLAYER / FULLSCREEN */
+.video-flirt-overlay {
+  position: absolute;
+  top: 18%;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #ffffff !important;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-family: var(--font-heading);
+  font-size: clamp(1.2rem, 3.5vw, 2.2rem);
+  font-weight: 800;
+  text-align: center;
+  z-index: 30;
+  pointer-events: none;
+  width: 90%;
+  max-width: 700px;
+  text-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.95),
+    0 0 20px rgba(14, 165, 233, 0.7),
+    0 0 35px rgba(56, 189, 248, 0.5);
+  animation: flirtPopIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes flirtPopIn {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -20px) scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
