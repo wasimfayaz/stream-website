@@ -28,11 +28,11 @@ const DEFAULT_MOVIES = [];
 const REACTIONS = ['❤️', '😂', '😮', '🔥', '🍿', '😢'];
 
 const MOVIE_SERVERS = [
-  { id: '2embed', name: 'Server 1 (2Embed - Global English HD & Stable)', getUrl: (imdbId) => `https://www.2embed.cc/embed/${imdbId}` },
-  { id: 'vidsrc_cc', name: 'Server 2 (VidSrc CC - English Original)', getUrl: (imdbId) => `https://vidsrc.cc/v2/embed/movie/${imdbId}` },
-  { id: 'vidsrc_me', name: 'Server 3 (VidSrc ME - Global HD)', getUrl: (imdbId) => `https://vidsrc.me/embed/movie?imdb=${imdbId}` },
-  { id: 'vidsrc_pm', name: 'Server 4 (VidSrc PM - Fast Mirror)', getUrl: (imdbId) => `https://vidsrc.pm/embed/movie?imdb=${imdbId}` },
-  { id: 'multiembed', name: 'Server 5 (SuperEmbed - Multi Audio/Subtitles)', getUrl: (imdbId) => `https://multiembed.mov/directstream.php?video_id=${imdbId}` }
+  { id: '2embed', name: 'Server 1 (2Embed - Original English HD)', getUrl: (imdbId) => `https://www.2embed.cc/embed/${imdbId}` },
+  { id: 'vidsrc_cc', name: 'Server 2 (VidSrc CC - Pure English Track)', getUrl: (imdbId) => `https://vidsrc.cc/v2/embed/movie/${imdbId}` },
+  { id: 'vidsrc_net', name: 'Server 3 (VidSrc NET - Global English)', getUrl: (imdbId) => `https://vidsrc.net/embed/movie/${imdbId}` },
+  { id: 'vidsrc_me', name: 'Server 4 (VidSrc ME - English Audio)', getUrl: (imdbId) => `https://vidsrc.me/embed/movie?imdb=${imdbId}` },
+  { id: 'moviesapi', name: 'Server 5 (MoviesAPI - Global English Mirror)', getUrl: (imdbId) => `https://moviesapi.club/movie/${imdbId}` }
 ];
 
 const POPULAR_MOVIES = [
