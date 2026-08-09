@@ -334,10 +334,12 @@ function App() {
         }
       });
 
-      newSocket.on('media_played', ({ currentTime: syncTime, username: actionUser }) => {
+      newSocket.on('media_played', ({ currentTime: syncTime, username: actionUser, serverTimestamp }) => {
         if (videoRef.current) {
           ignoreTimeUpdate.current = true;
-          videoRef.current.currentTime = syncTime;
+          const latency = serverTimestamp ? Math.max(0, (Date.now() - serverTimestamp) / 1000) : 0;
+          const targetTime = syncTime + latency;
+          videoRef.current.currentTime = targetTime;
           videoRef.current.play()
             .then(() => {
               setIsPlaying(true);
@@ -375,12 +377,14 @@ function App() {
         }
       });
 
-      newSocket.on('media_seeked', ({ currentTime: syncTime, username: actionUser }) => {
+      newSocket.on('media_seeked', ({ currentTime: syncTime, username: actionUser, serverTimestamp }) => {
         if (videoRef.current) {
           ignoreTimeUpdate.current = true;
-          videoRef.current.currentTime = syncTime;
-          setCurrentTime(syncTime);
-          triggerSyncToast(`${actionUser} jumped to ${formatTime(syncTime)}`);
+          const latency = serverTimestamp ? Math.max(0, (Date.now() - serverTimestamp) / 1000) : 0;
+          const targetTime = syncTime + latency;
+          videoRef.current.currentTime = targetTime;
+          setCurrentTime(targetTime);
+          triggerSyncToast(`${actionUser} jumped to ${formatTime(targetTime)}`);
           ignoreTimeUpdate.current = false;
         }
       });
@@ -905,19 +909,35 @@ function App() {
     // Fallback to standard cloud server upload mode:
     setIsUploading(true);
     
+    const fileId = Date.now();
+    const videoStreamUrl = '/api/video?v=' + fileId;
+
     setCurrentVideo({
-      id: 'local-' + Date.now(),
+      id: 'local-' + fileId,
       title: file.name,
       url: objectUrl,
       description: 'Uploading to server in the background...',
       isLocalFile: true
     });
     
+    // Emit video_change IMMEDIATELY so partner receives the stream URL and can buffer right away
+    if (socket) {
+      const streamingMovie = {
+        id: 'local-' + fileId,
+        title: file.name,
+        url: videoStreamUrl,
+        description: `Streaming directly from ${username}'s local storage.`,
+        isLocalFile: false
+      };
+      socket.emit('video_change', { roomId, video: streamingMovie, username });
+    }
+
     const uploadUrl = import.meta.env.DEV ? 'http://localhost:5000/api/upload' : '/api/upload';
     const xhr = new XMLHttpRequest();
     xhr.open('POST', uploadUrl);
     xhr.setRequestHeader('Content-Type', file.type || 'video/mp4');
     xhr.setRequestHeader('X-File-Name', encodeURIComponent(file.name));
+    xhr.setRequestHeader('X-File-Size', file.size.toString());
     
     // Track upload progress
     xhr.upload.onprogress = (event) => {
@@ -932,19 +952,7 @@ function App() {
     xhr.onload = () => {
       setIsUploading(false);
       if (xhr.status >= 200 && xhr.status < 300) {
-        const data = JSON.parse(xhr.responseText);
-        // Once finished, emit video_change to update the room for the partner
-        if (socket) {
-          const localMovie = {
-            id: 'local-' + Date.now(),
-            title: file.name,
-            url: data.url, // "/api/video"
-            description: `Streaming directly from ${username}'s local storage.`,
-            isLocalFile: false
-          };
-          socket.emit('video_change', { roomId, video: localMovie, username });
-        }
-        triggerSyncToast('Video uploaded and streaming to room!');
+        triggerSyncToast('Video upload complete & streaming fully ready!');
       } else {
         alert('Upload failed: ' + xhr.statusText);
       }
@@ -1130,18 +1138,7 @@ function App() {
                   style={{ width: '100%', height: '100%', border: 'none', background: '#000' }}
                 />
               </>
-            ) : partnerUpload ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '1.5rem', padding: '2rem', background: '#050b14', color: 'white' }}>
-                <div style={{ position: 'relative', width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <div className="status-dot" style={{ width: '60px', height: '60px', borderRadius: '50%', border: '4px dashed var(--primary)', animation: 'spin 2s linear infinite' }}></div>
-                  <span style={{ position: 'absolute', fontWeight: 'bold', fontSize: '1.1rem' }}>{partnerUpload.percent}%</span>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <p style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>Streaming Incoming Movie</p>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.25rem' }}>{partnerUpload.username} is sending <strong>{partnerUpload.fileName}</strong> to the theater...</p>
-                </div>
-              </div>
-            ) : (currentVideo && currentVideo.url === 'p2p-local' && (!localFile || !hasConfirmedFile)) ? (
+                        ) : (currentVideo && currentVideo.url === 'p2p-local' && (!localFile || !hasConfirmedFile)) ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '1.5rem', padding: '2rem', background: '#050b14', color: 'white' }} onDragOver={handleDragOver} onDrop={handleDrop} onClick={() => fileInputRef.current?.click()}>
                 <FileVideo size={48} color="var(--primary)" />
                 <div style={{ textAlign: 'center' }}>
@@ -1165,6 +1162,9 @@ function App() {
                 onLoadedMetadata={handleLoadedMetadata}
                 onWaiting={() => setIsBuffering(true)}
                 onPlaying={() => setIsBuffering(false)}
+                onCanPlay={() => setIsBuffering(false)}
+                onStalled={() => setIsBuffering(true)}
+                preload="auto"
                 muted={isMuted}
               />
             ) : (
@@ -1177,6 +1177,14 @@ function App() {
               </div>
             )}
 
+            {/* Non-blocking background upload progress badges */}
+            {partnerUpload && (
+              <div style={{ position: 'absolute', top: '12px', right: '55px', zIndex: 35, background: 'rgba(11, 19, 36, 0.85)', backdropFilter: 'blur(8px)', color: 'white', padding: '0.4rem 0.8rem', borderRadius: 'var(--radius-sm)', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px solid rgba(168, 85, 247, 0.3)', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+                <div className="status-dot" style={{ width: '10px', height: '10px', borderRadius: '50%', border: '2px solid var(--primary)', borderTopColor: 'transparent', animation: 'spin 1s linear infinite' }}></div>
+                <span>Receiving stream from {partnerUpload.username}: <strong>{partnerUpload.percent}%</strong></span>
+              </div>
+            )}
+
             {/* Programmatic play/pause overlay splash animation */}
             <div className={`play-pause-overlay-icon ${overlayIcon.active ? 'active' : ''}`}>
               {overlayIcon.type === 'play' ? <Play size={36} fill="white" /> : <Pause size={36} fill="white" />}
@@ -1184,8 +1192,9 @@ function App() {
 
             {/* Waiting/Buffering Indicator */}
             {isBuffering && (
-              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: 'rgba(0,0,0,0.6)', padding: '1rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div className="status-dot" style={{ width: '20px', height: '20px', animation: 'ping 1s cubic-bezier(0, 0, 0.2, 1) infinite', backgroundColor: 'var(--primary)' }}></div>
+              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: 'rgba(5, 11, 20, 0.85)', backdropFilter: 'blur(6px)', padding: '0.75rem 1.25rem', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: '0.75rem', zIndex: 30, border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 8px 24px rgba(0,0,0,0.4)' }}>
+                <div className="status-dot" style={{ width: '14px', height: '14px', borderRadius: '50%', border: '2px solid var(--primary)', borderTopColor: 'transparent', animation: 'spin 1s linear infinite' }}></div>
+                <span style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 500 }}>Buffering video stream...</span>
               </div>
             )}
 

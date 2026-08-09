@@ -869,7 +869,7 @@ io.on('connection', (socket) => {
       room.playback.currentTime = currentTime;
       room.playback.lastUpdated = Date.now();
       
-      socket.to(roomId).emit('media_played', { currentTime, username });
+      socket.to(roomId).emit('media_played', { currentTime, username, serverTimestamp: Date.now() });
     }
   });
 
@@ -889,7 +889,7 @@ io.on('connection', (socket) => {
       room.playback.currentTime = currentTime;
       room.playback.lastUpdated = Date.now();
       
-      socket.to(roomId).emit('media_seeked', { currentTime, username });
+      socket.to(roomId).emit('media_seeked', { currentTime, username, serverTimestamp: Date.now() });
     }
   });
   
@@ -954,31 +954,131 @@ io.on('connection', (socket) => {
   });
 });
 
-// Local file upload endpoint
+// Active upload metadata store for handling concurrent upload & streaming
+let activeUpload = null;
+
+// Local file upload endpoint with progressive byte tracking
 app.post('/api/upload', (req, res) => {
   const fileName = decodeURIComponent(req.headers['x-file-name'] || 'video.mp4');
+  const fileSize = parseInt(req.headers['x-file-size'] || '0', 10);
+  const mimeType = req.headers['content-type'] || 'video/mp4';
   const filePath = path.join(__dirname, 'temp_video.mp4');
-  
+
+  activeUpload = {
+    filePath,
+    fileName,
+    mimeType,
+    totalSize: fileSize,
+    uploadedBytes: 0,
+    isUploading: true,
+    startTime: Date.now()
+  };
+
   const writeStream = fs.createWriteStream(filePath);
+
+  req.on('data', (chunk) => {
+    if (activeUpload) {
+      activeUpload.uploadedBytes += chunk.length;
+    }
+  });
+
   req.pipe(writeStream);
-  
+
   req.on('end', () => {
+    if (activeUpload) {
+      activeUpload.isUploading = false;
+      if (!activeUpload.totalSize) {
+        activeUpload.totalSize = activeUpload.uploadedBytes;
+      }
+    }
     res.json({ success: true, url: '/api/video', title: fileName });
   });
-  
+
   req.on('error', (err) => {
     console.error('Upload error:', err);
+    if (activeUpload) activeUpload.isUploading = false;
     res.status(500).json({ error: err.message });
   });
 });
 
-// Stream uploaded local file
+// Stream uploaded local file with full HTTP Byte-Range Requests support
 app.get('/api/video', (req, res) => {
   const filePath = path.join(__dirname, 'temp_video.mp4');
   if (!fs.existsSync(filePath)) {
     return res.status(404).send('No video uploaded yet');
   }
-  res.sendFile(filePath);
+
+  let stat;
+  try {
+    stat = fs.statSync(filePath);
+  } catch (err) {
+    return res.status(404).send('Video file unreadable');
+  }
+
+  const currentSize = stat.size;
+  if (currentSize === 0) {
+    res.setHeader('Retry-After', '1');
+    return res.status(503).send('Video buffer initializing...');
+  }
+
+  const totalSize = (activeUpload && activeUpload.totalSize > 0)
+    ? activeUpload.totalSize
+    : currentSize;
+
+  const mimeType = (activeUpload && activeUpload.mimeType)
+    ? activeUpload.mimeType
+    : 'video/mp4';
+
+  const range = req.headers.range;
+
+  if (!range) {
+    // Standard full stream (or when browser does not pass Range header)
+    res.writeHead(200, {
+      'Content-Length': currentSize,
+      'Content-Type': mimeType,
+      'Accept-Ranges': 'bytes'
+    });
+    return fs.createReadStream(filePath).pipe(res);
+  }
+
+  // Parse HTTP Range header (e.g. "bytes=0-" or "bytes=1024-4096")
+  const parts = range.replace(/bytes=/, '').split('-');
+  const start = parseInt(parts[0], 10);
+  let end = parts[1] ? parseInt(parts[1], 10) : totalSize - 1;
+
+  if (isNaN(start) || start < 0 || start >= totalSize) {
+    res.setHeader('Content-Range', `bytes */${totalSize}`);
+    return res.status(416).send('Requested range not satisfiable');
+  }
+
+  // Cap requested end to current bytes written on disk for growing uploads
+  if (end >= currentSize) {
+    end = currentSize - 1;
+  }
+
+  if (start > end) {
+    res.setHeader('Content-Range', `bytes */${totalSize}`);
+    return res.status(416).send('Requested range not yet buffered');
+  }
+
+  const chunkSize = (end - start) + 1;
+
+  res.writeHead(206, {
+    'Content-Range': `bytes ${start}-${end}/${totalSize}`,
+    'Accept-Ranges': 'bytes',
+    'Content-Length': chunkSize,
+    'Content-Type': mimeType
+  });
+
+  const readStream = fs.createReadStream(filePath, { start, end });
+  readStream.pipe(res);
+
+  readStream.on('error', (err) => {
+    console.error('Error reading video stream:', err);
+    if (!res.headersSent) {
+      res.status(500).send(err.message);
+    }
+  });
 });
 
 app.get('*', (req, res) => {
