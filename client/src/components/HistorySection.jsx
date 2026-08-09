@@ -9,9 +9,9 @@ export default function HistorySection({ socket, roomId }) {
 
   const fetchHistory = async () => {
     try {
-      const token = localStorage.getItem('streaam_token');
-      const res = await fetch(`${API_BASE}/api/watch-history`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+      if (!roomId) return;
+      const res = await fetch(`${API_BASE}/api/watch-history?roomId=${encodeURIComponent(roomId)}`, {
+        headers: { 'x-room-id': roomId }
       });
       const data = await res.json();
       if (Array.isArray(data)) setHistory(data);
@@ -24,7 +24,7 @@ export default function HistorySection({ socket, roomId }) {
 
   useEffect(() => {
     fetchHistory();
-  }, []);
+  }, [roomId]);
 
   useEffect(() => {
     if (socket) {
@@ -36,7 +36,7 @@ export default function HistorySection({ socket, roomId }) {
         socket.off('history_updated', handleHistoryUpdate);
       };
     }
-  }, [socket]);
+  }, [socket, roomId]);
 
   const formatDuration = (secs) => {
     if (!secs) return 'N/A';

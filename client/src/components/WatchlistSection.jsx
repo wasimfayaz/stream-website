@@ -12,9 +12,9 @@ export default function WatchlistSection({ onSelectMovie, socket, roomId }) {
 
   const fetchWatchlist = async () => {
     try {
-      const token = localStorage.getItem('streaam_token');
-      const res = await fetch(`${API_BASE}/api/watchlist`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+      if (!roomId) return;
+      const res = await fetch(`${API_BASE}/api/watchlist?roomId=${encodeURIComponent(roomId)}`, {
+        headers: { 'x-room-id': roomId }
       });
       const data = await res.json();
       if (Array.isArray(data)) setItems(data);
@@ -27,7 +27,7 @@ export default function WatchlistSection({ onSelectMovie, socket, roomId }) {
 
   useEffect(() => {
     fetchWatchlist();
-  }, []);
+  }, [roomId]);
 
   useEffect(() => {
     if (socket) {
@@ -39,20 +39,20 @@ export default function WatchlistSection({ onSelectMovie, socket, roomId }) {
         socket.off('watchlist_updated', handleWatchlistUpdate);
       };
     }
-  }, [socket]);
+  }, [socket, roomId]);
 
   const handleAddItem = async (e) => {
     e.preventDefault();
     if (!title.trim()) return;
     try {
-      const token = localStorage.getItem('streaam_token');
       const res = await fetch(`${API_BASE}/api/watchlist`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'x-room-id': roomId
         },
         body: JSON.stringify({
+          roomId,
           title: title.trim(),
           posterUrl: posterUrl.trim() || 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=500&auto=format&fit=crop&q=60'
         })
@@ -73,14 +73,13 @@ export default function WatchlistSection({ onSelectMovie, socket, roomId }) {
 
   const handleStatusChange = async (id, status) => {
     try {
-      const token = localStorage.getItem('streaam_token');
       await fetch(`${API_BASE}/api/watchlist/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'x-room-id': roomId
         },
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ status, roomId })
       });
       setItems(items.map(item => item.id === id ? { ...item, status } : item));
 
@@ -94,10 +93,9 @@ export default function WatchlistSection({ onSelectMovie, socket, roomId }) {
 
   const handleDeleteItem = async (id) => {
     try {
-      const token = localStorage.getItem('streaam_token');
-      await fetch(`${API_BASE}/api/watchlist/${id}`, {
+      await fetch(`${API_BASE}/api/watchlist/${id}?roomId=${encodeURIComponent(roomId)}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'x-room-id': roomId }
       });
       setItems(items.filter(item => item.id !== id));
 

@@ -60,8 +60,8 @@ model Message {
   id         String   @id @default(uuid())
   coupleId   String
   couple     Couple   @relation(fields: [coupleId], references: [id])
-  senderId   String
-  sender     User     @relation(fields: [senderId], references: [id])
+  senderId   String?
+  sender     User?    @relation(fields: [senderId], references: [id])
   text       String
   isSystem   Boolean  @default(false)
   createdAt  DateTime @default(now())
@@ -71,8 +71,8 @@ model WatchlistItem {
   id         String   @id @default(uuid())
   coupleId   String
   couple     Couple   @relation(fields: [coupleId], references: [id])
-  addedById  String
-  addedBy    User     @relation(fields: [addedById], references: [id])
+  addedById  String?
+  addedBy    User?    @relation(fields: [addedById], references: [id])
   imdbId     String?
   title      String
   posterUrl  String?
@@ -84,8 +84,8 @@ model Rating {
   id             String       @id @default(uuid())
   watchSessionId String
   watchSession   WatchSession @relation(fields: [watchSessionId], references: [id])
-  userId         String
-  user           User         @relation(fields: [userId], references: [id])
+  userId         String?
+  user           User?        @relation(fields: [userId], references: [id])
   stars          Int          // 1 to 5 stars
   review         String?
   createdAt      DateTime     @default(now())
@@ -95,8 +95,8 @@ model Memory {
   id           String   @id @default(uuid())
   coupleId     String
   couple       Couple   @relation(fields: [coupleId], references: [id])
-  uploadedById String
-  uploadedBy   User     @relation(fields: [uploadedById], references: [id])
+  uploadedById String?
+  uploadedBy   User?    @relation(fields: [uploadedById], references: [id])
   mediaUrl     String   // S3 / Cloudinary URL or local relative path
   mediaType    String   // 'IMAGE' or 'VIDEO'
   caption      String?

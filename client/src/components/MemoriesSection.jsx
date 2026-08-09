@@ -13,9 +13,9 @@ export default function MemoriesSection({ socket, roomId }) {
 
   const fetchMemories = async () => {
     try {
-      const token = localStorage.getItem('streaam_token');
-      const res = await fetch(`${API_BASE}/api/memories`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+      if (!roomId) return;
+      const res = await fetch(`${API_BASE}/api/memories?roomId=${encodeURIComponent(roomId)}`, {
+        headers: { 'x-room-id': roomId }
       });
       const data = await res.json();
       if (Array.isArray(data)) setMemories(data);
@@ -28,7 +28,7 @@ export default function MemoriesSection({ socket, roomId }) {
 
   useEffect(() => {
     fetchMemories();
-  }, []);
+  }, [roomId]);
 
   useEffect(() => {
     if (socket) {
@@ -40,20 +40,20 @@ export default function MemoriesSection({ socket, roomId }) {
         socket.off('memories_updated', handleMemoriesUpdate);
       };
     }
-  }, [socket]);
+  }, [socket, roomId]);
 
   const handleAddMemory = async (e) => {
     e.preventDefault();
     if (!mediaUrl.trim()) return;
     try {
-      const token = localStorage.getItem('streaam_token');
       const res = await fetch(`${API_BASE}/api/memories`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'x-room-id': roomId
         },
         body: JSON.stringify({
+          roomId,
           mediaUrl: mediaUrl.trim(),
           caption: caption.trim(),
           memoryDate: memoryDate || new Date().toISOString()

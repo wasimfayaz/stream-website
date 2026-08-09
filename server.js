@@ -106,379 +106,42 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// Register new user
-// Register new user
-app.post('/api/auth/register', async (req, res) => {
-  try {
-    const { email, username, password } = req.body;
-    if (!email || !username || !password) {
-      return res.status(400).json({ error: 'Email, username, and password are required' });
-    }
-
-    const existingUser = await prisma.user.findUnique({ where: { email } });
-    if (existingUser) {
-      return res.status(400).json({ error: 'User with this email already exists' });
-    }
-
-    const passwordHash = await bcrypt.hash(password, 10);
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-
-    const user = await prisma.user.create({
-      data: { 
-        email, 
-        username, 
-        passwordHash,
-        isVerified: false,
-        verificationCode
-      }
+// Helper to resolve or auto-create room couple space in DB by roomId
+async function getCoupleByRoomId(roomId) {
+  if (!roomId) return null;
+  const roomCode = String(roomId).trim();
+  let couple = await prisma.couple.findFirst({
+    where: { inviteCode: roomCode }
+  });
+  if (!couple) {
+    couple = await prisma.couple.create({
+      data: { inviteCode: roomCode }
     });
-
-    // Send verification email
-    await sendEmail(
-      email,
-      'Verify your Streaam account',
-      `Hello ${username}! Your 6-digit verification code is: ${verificationCode}`,
-      `<h2>Welcome to Streaam!</h2>
-       <p>Thank you for signing up to share your permanent couple space.</p>
-       <p>Please enter the following 6-digit code on the signup screen to verify your email:</p>
-       <div style="font-size: 1.5rem; font-weight: bold; color: #ff4b2b; padding: 0.5rem 1rem; background: #f8fafc; border-radius: 4px; display: inline-block; letter-spacing: 2px;">
-         ${verificationCode}
-       </div>`
-    );
-
-    const isMock = !process.env.EMAIL_USER || !process.env.EMAIL_PASS;
-    res.json({ requiresVerification: true, email: user.email, mockCode: isMock ? verificationCode : null });
-  } catch (err) {
-    console.error('Registration error:', err);
-    if (err.code === 'P2002') {
-      return res.status(400).json({ error: 'User with this email already exists' });
-    }
-    res.status(500).json({ error: err.message || 'Failed to register user' });
   }
-});
-
-// Verify registration code
-app.post('/api/auth/verify', async (req, res) => {
-  try {
-    const { email, code } = req.body;
-    if (!email || !code) {
-      return res.status(400).json({ error: 'Email and verification code are required' });
-    }
-
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    if (user.verificationCode !== code) {
-      return res.status(400).json({ error: 'Invalid verification code' });
-    }
-
-    // Set user as verified
-    const updatedUser = await prisma.user.update({
-      where: { email },
-      data: { isVerified: true, verificationCode: null },
-      include: { couple: { include: { users: true } } }
-    });
-
-    const token = jwt.sign(
-      { userId: updatedUser.id, email: updatedUser.email, username: updatedUser.username, coupleId: updatedUser.coupleId },
-      JWT_SECRET
-    );
-
-    const partner = updatedUser.couple?.users.find(u => u.id !== updatedUser.id);
-
-    res.json({
-      token,
-      user: {
-        id: updatedUser.id,
-        email: updatedUser.email,
-        username: updatedUser.username,
-        coupleId: updatedUser.coupleId,
-        couple: updatedUser.couple ? { id: updatedUser.couple.id, inviteCode: updatedUser.couple.inviteCode } : null,
-        partner: partner ? { id: partner.id, username: partner.username, email: partner.email } : null
-      }
-    });
-  } catch (err) {
-    console.error('Verification error:', err);
-    res.status(500).json({ error: 'Failed to verify account' });
-  }
-});
-
-// Login existing user
-app.post('/api/auth/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { email },
-      include: { couple: { include: { users: true } } }
-    });
-
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid email or password' });
-    }
-
-    const validPassword = await bcrypt.compare(password, user.passwordHash);
-    if (!validPassword) {
-      return res.status(401).json({ error: 'Invalid email or password' });
-    }
-
-    if (!user.isVerified) {
-      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-      await prisma.user.update({
-        where: { email },
-        data: { verificationCode }
-      });
-      
-      await sendEmail(
-        email,
-        'Verify your Streaam account',
-        `Hello ${user.username}! Your 6-digit verification code is: ${verificationCode}`,
-        `<h2>Verify your Streaam account</h2>
-         <p>Please enter the following 6-digit code to complete verification:</p>
-         <div style="font-size: 1.5rem; font-weight: bold; color: #ff4b2b; padding: 0.5rem 1rem; background: #f8fafc; border-radius: 4px; display: inline-block; letter-spacing: 2px;">
-           ${verificationCode}
-         </div>`
-      );
-
-      const isMock = !process.env.EMAIL_USER || !process.env.EMAIL_PASS;
-      return res.status(403).json({ requiresVerification: true, email: user.email, mockCode: isMock ? verificationCode : null, error: 'Please verify your email address. A code has been sent to your email.' });
-    }
-
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, username: user.username, coupleId: user.coupleId },
-      JWT_SECRET
-    );
-
-    const partner = user.couple?.users.find(u => u.id !== user.id);
-
-    res.json({
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        coupleId: user.coupleId,
-        couple: user.couple ? { id: user.couple.id, inviteCode: user.couple.inviteCode } : null,
-        partner: partner ? { id: partner.id, username: partner.username, email: partner.email } : null
-      }
-    });
-  } catch (err) {
-    console.error('Login error:', err);
-    res.status(500).json({ error: 'Failed to log in' });
-  }
-});
-
-// Request password reset code
-app.post('/api/auth/forgot-password', async (req, res) => {
-  try {
-    const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ error: 'Email is required' });
-    }
-
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
-      return res.json({ success: true, message: 'If that email exists in our system, a reset code was sent!' });
-    }
-
-    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const resetExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes expiry
-
-    await prisma.user.update({
-      where: { email },
-      data: { resetCode, resetExpiry }
-    });
-
-    await sendEmail(
-      email,
-      'Reset your Streaam password',
-      `Hello ${user.username}! Your 6-digit password reset code is: ${resetCode}`,
-      `<h2>Password Reset Request</h2>
-       <p>You requested a password reset for your Streaam account.</p>
-       <p>Please enter the following 6-digit code on the reset screen to change your password:</p>
-       <div style="font-size: 1.5rem; font-weight: bold; color: #ff4b2b; padding: 0.5rem 1rem; background: #f8fafc; border-radius: 4px; display: inline-block; letter-spacing: 2px;">
-         ${resetCode}
-       </div>
-       <p>This code is valid for 15 minutes.</p>`
-    );
-
-    const isMock = !process.env.EMAIL_USER || !process.env.EMAIL_PASS;
-    res.json({ success: true, message: 'Reset code sent to your email', mockCode: isMock ? resetCode : null });
-  } catch (err) {
-    console.error('Forgot password error:', err);
-    res.status(500).json({ error: 'Failed to send reset code' });
-  }
-});
-
-// Reset password using reset code
-app.post('/api/auth/reset-password', async (req, res) => {
-  try {
-    const { email, code, newPassword } = req.body;
-    if (!email || !code || !newPassword) {
-      return res.status(400).json({ error: 'Email, reset code, and new password are required' });
-    }
-
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    if (!user.resetCode || user.resetCode !== code) {
-      return res.status(400).json({ error: 'Invalid reset code' });
-    }
-
-    if (user.resetExpiry && user.resetExpiry < new Date()) {
-      return res.status(400).json({ error: 'Reset code has expired' });
-    }
-
-    const passwordHash = await bcrypt.hash(newPassword, 10);
-    await prisma.user.update({
-      where: { email },
-      data: {
-        passwordHash,
-        resetCode: null,
-        resetExpiry: null,
-        isVerified: true
-      }
-    });
-
-    res.json({ success: true, message: 'Password updated successfully. You can now login with your new password!' });
-  } catch (err) {
-    console.error('Reset password error:', err);
-    res.status(500).json({ error: 'Failed to reset password' });
-  }
-});
-
-// Get Current User Profile
-app.get('/api/auth/me', authenticateToken, async (req, res) => {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: req.user.userId },
-      include: { couple: { include: { users: true } } }
-    });
-
-    if (!user) return res.status(404).json({ error: 'User not found' });
-
-    const partner = user.couple?.users.find(u => u.id !== user.id);
-
-    res.json({
-      id: user.id,
-      email: user.email,
-      username: user.username,
-      coupleId: user.coupleId,
-      couple: user.couple ? { id: user.couple.id, inviteCode: user.couple.inviteCode } : null,
-      partner: partner ? { id: partner.id, username: partner.username, email: partner.email } : null
-    });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch profile' });
-  }
-});
-
-// Create a new Couple Space
-app.post('/api/auth/create-couple', authenticateToken, async (req, res) => {
-  try {
-    const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
-    if (user.coupleId) {
-      return res.status(400).json({ error: 'User already belongs to a couple space' });
-    }
-
-    // Generate random 6-character uppercase invite code
-    const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-    const couple = await prisma.couple.create({
-      data: {
-        inviteCode,
-        users: { connect: { id: user.id } }
-      },
-      include: { users: true }
-    });
-
-    // Update token payload
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, username: user.username, coupleId: couple.id },
-      JWT_SECRET
-    );
-
-    res.json({ token, couple: { id: couple.id, inviteCode: couple.inviteCode } });
-  } catch (err) {
-    console.error('Create couple error:', err);
-    res.status(500).json({ error: 'Failed to create couple space' });
-  }
-});
-
-// Join an existing Couple Space using Invite Code
-app.post('/api/auth/join-couple', authenticateToken, async (req, res) => {
-  try {
-    const { inviteCode } = req.body;
-    if (!inviteCode) return res.status(400).json({ error: 'Invite code is required' });
-
-    const couple = await prisma.couple.findUnique({
-      where: { inviteCode: inviteCode.trim().toUpperCase() },
-      include: { users: true }
-    });
-
-    if (!couple) {
-      return res.status(404).json({ error: 'Invalid couple invite code' });
-    }
-
-    if (couple.users.length >= 2) {
-      return res.status(400).json({ error: 'This couple space is already full (maximum 2 partners)' });
-    }
-
-    await prisma.user.update({
-      where: { id: req.user.userId },
-      data: { coupleId: couple.id }
-    });
-
-    const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, username: user.username, coupleId: couple.id },
-      JWT_SECRET
-    );
-
-    res.json({ token, couple: { id: couple.id, inviteCode: couple.inviteCode } });
-  } catch (err) {
-    console.error('Join couple error:', err);
-    res.status(500).json({ error: 'Failed to join couple space' });
-  }
-});
+  return couple;
+}
 
 // ==========================================
 // PERSISTENT CHAT & WATCH SESSION ROUTES
 // ==========================================
 
-// Get Chat History with pagination
-app.get('/api/chat', authenticateToken, async (req, res) => {
+// Get Chat History
+app.get('/api/chat', async (req, res) => {
   try {
-    const { cursor, limit = 50 } = req.query;
-    if (!req.user.coupleId) {
-      return res.status(400).json({ error: 'User does not belong to a couple space' });
-    }
+    const roomId = req.query.roomId || req.headers['x-room-id'];
+    if (!roomId) return res.json([]);
+    const couple = await getCoupleByRoomId(roomId);
+    if (!couple) return res.json([]);
 
-    const take = parseInt(limit);
-    const query = {
-      where: { coupleId: req.user.coupleId },
-      take: take,
-      orderBy: { createdAt: 'desc' },
-      include: { sender: { select: { id: true, username: true } } }
-    };
-
-    if (cursor) {
-      query.cursor = { id: cursor };
-      query.skip = 1;
-    }
-
-    const dbMessages = await prisma.message.findMany(query);
+    const dbMessages = await prisma.message.findMany({
+      where: { coupleId: couple.id },
+      take: 100,
+      orderBy: { createdAt: 'desc' }
+    });
     
-    // Transform to frontend message format in chronological order
     const formatted = dbMessages.reverse().map(m => ({
       id: m.id,
-      sender: m.sender ? m.sender.username : 'System',
-      senderId: m.senderId,
+      sender: 'Partner',
       text: m.text,
       isSystem: m.isSystem,
       timestamp: new Date(m.createdAt).getTime()
@@ -487,12 +150,12 @@ app.get('/api/chat', authenticateToken, async (req, res) => {
     res.json(formatted);
   } catch (err) {
     console.error('Chat history error:', err);
-    res.status(500).json({ error: 'Failed to fetch chat history' });
+    res.json([]);
   }
 });
 
 // Update playback progress for Continue Watching
-app.post('/api/watch-session/progress', authenticateToken, async (req, res) => {
+app.post('/api/watch-session/progress', async (req, res) => {
   try {
     const { sessionId, currentTime, duration, isCompleted } = req.body;
     if (!sessionId) return res.status(400).json({ error: 'sessionId is required' });
@@ -517,18 +180,17 @@ app.post('/api/watch-session/progress', authenticateToken, async (req, res) => {
   }
 });
 
-// ==========================================
-// WATCHLIST, HISTORY, CONTINUE WATCHING & RATINGS
-// ==========================================
-
 // Get Watchlist
-app.get('/api/watchlist', authenticateToken, async (req, res) => {
+app.get('/api/watchlist', async (req, res) => {
   try {
-    if (!req.user.coupleId) return res.status(400).json({ error: 'No couple space' });
+    const roomId = req.query.roomId || req.headers['x-room-id'];
+    if (!roomId) return res.json([]);
+    const couple = await getCoupleByRoomId(roomId);
+    if (!couple) return res.json([]);
+
     const items = await prisma.watchlistItem.findMany({
-      where: { coupleId: req.user.coupleId },
-      orderBy: { createdAt: 'desc' },
-      include: { addedBy: { select: { username: true } } }
+      where: { coupleId: couple.id },
+      orderBy: { createdAt: 'desc' }
     });
     res.json(items);
   } catch (err) {
@@ -537,42 +199,41 @@ app.get('/api/watchlist', authenticateToken, async (req, res) => {
 });
 
 // Add to Watchlist
-app.post('/api/watchlist', authenticateToken, async (req, res) => {
+app.post('/api/watchlist', async (req, res) => {
   try {
-    const { title, posterUrl, imdbId, status = 'WANT_TO_WATCH' } = req.body;
-    if (!title) return res.status(400).json({ error: 'Title is required' });
+    const { roomId, title, posterUrl, imdbId, status = 'WANT_TO_WATCH' } = req.body;
+    const roomCode = roomId || req.headers['x-room-id'];
+    if (!title || !roomCode) return res.status(400).json({ error: 'Title and roomId are required' });
 
+    const couple = await getCoupleByRoomId(roomCode);
     const item = await prisma.watchlistItem.create({
       data: {
-        coupleId: req.user.coupleId,
-        addedById: req.user.userId,
+        coupleId: couple.id,
         title,
         posterUrl,
         imdbId,
         status
-      },
-      include: { addedBy: { select: { username: true } } }
+      }
     });
 
-    const couple = await prisma.couple.findUnique({ where: { id: req.user.coupleId } });
-    if (couple && couple.inviteCode) {
-      io.to(couple.inviteCode).emit('watchlist_updated', item);
-    }
-
+    io.to(roomCode).emit('watchlist_updated', item);
     res.json(item);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to add to watchlist' });
+    console.error('Failed to add to watchlist:', err);
+    res.status(500).json({ error: 'Failed to add to watchlist', details: err.message });
   }
 });
 
 // Update Watchlist Item Status
-app.patch('/api/watchlist/:id', authenticateToken, async (req, res) => {
+app.patch('/api/watchlist/:id', async (req, res) => {
   try {
-    const { status } = req.body;
+    const { status, roomId } = req.body;
     const item = await prisma.watchlistItem.update({
       where: { id: req.params.id },
       data: { status }
     });
+    const roomCode = roomId || req.headers['x-room-id'];
+    if (roomCode) io.to(roomCode).emit('watchlist_updated', item);
     res.json(item);
   } catch (err) {
     res.status(500).json({ error: 'Failed to update watchlist item' });
@@ -580,9 +241,11 @@ app.patch('/api/watchlist/:id', authenticateToken, async (req, res) => {
 });
 
 // Delete Watchlist Item
-app.delete('/api/watchlist/:id', authenticateToken, async (req, res) => {
+app.delete('/api/watchlist/:id', async (req, res) => {
   try {
     await prisma.watchlistItem.delete({ where: { id: req.params.id } });
+    const roomCode = req.query.roomId || req.headers['x-room-id'];
+    if (roomCode) io.to(roomCode).emit('watchlist_updated');
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete watchlist item' });
@@ -590,13 +253,17 @@ app.delete('/api/watchlist/:id', authenticateToken, async (req, res) => {
 });
 
 // Get Watch History
-app.get('/api/watch-history', authenticateToken, async (req, res) => {
+app.get('/api/watch-history', async (req, res) => {
   try {
-    if (!req.user.coupleId) return res.status(400).json({ error: 'No couple space' });
+    const roomId = req.query.roomId || req.headers['x-room-id'];
+    if (!roomId) return res.json([]);
+    const couple = await getCoupleByRoomId(roomId);
+    if (!couple) return res.json([]);
+
     const history = await prisma.watchSession.findMany({
-      where: { coupleId: req.user.coupleId },
+      where: { coupleId: couple.id },
       orderBy: { startedAt: 'desc' },
-      include: { ratings: { include: { user: { select: { username: true } } } } }
+      include: { ratings: true }
     });
     res.json(history);
   } catch (err) {
@@ -605,14 +272,18 @@ app.get('/api/watch-history', authenticateToken, async (req, res) => {
 });
 
 // Get Continue Watching Sessions
-app.get('/api/continue-watching', authenticateToken, async (req, res) => {
+app.get('/api/continue-watching', async (req, res) => {
   try {
-    if (!req.user.coupleId) return res.status(400).json({ error: 'No couple space' });
+    const roomId = req.query.roomId || req.headers['x-room-id'];
+    if (!roomId) return res.json([]);
+    const couple = await getCoupleByRoomId(roomId);
+    if (!couple) return res.json([]);
+
     const unfinished = await prisma.watchSession.findMany({
       where: {
-        coupleId: req.user.coupleId,
+        coupleId: couple.id,
         isCompleted: false,
-        lastPosition: { gt: 10 } // Paused at least 10 seconds in
+        lastPosition: { gt: 10 }
       },
       orderBy: { startedAt: 'desc' },
       take: 5
@@ -624,27 +295,22 @@ app.get('/api/continue-watching', authenticateToken, async (req, res) => {
 });
 
 // Add Rating to Watch Session
-app.post('/api/ratings', authenticateToken, async (req, res) => {
+app.post('/api/ratings', async (req, res) => {
   try {
-    const { watchSessionId, stars, review } = req.body;
+    const { watchSessionId, stars, review, roomId } = req.body;
     if (!watchSessionId || !stars) return res.status(400).json({ error: 'watchSessionId and stars required' });
 
     const rating = await prisma.rating.create({
       data: {
         watchSessionId,
-        userId: req.user.userId,
         stars: parseInt(stars),
         review
       },
-      include: {
-        user: { select: { username: true } },
-        watchSession: { include: { couple: true } }
-      }
+      include: { watchSession: { include: { couple: true } } }
     });
 
-    if (rating.watchSession?.couple?.inviteCode) {
-      io.to(rating.watchSession.couple.inviteCode).emit('history_updated');
-    }
+    const roomCode = roomId || rating.watchSession?.couple?.inviteCode;
+    if (roomCode) io.to(roomCode).emit('history_updated');
 
     res.json(rating);
   } catch (err) {
@@ -653,18 +319,17 @@ app.post('/api/ratings', authenticateToken, async (req, res) => {
   }
 });
 
-// ==========================================
-// PRIVATE MEMORIES ROUTES
-// ==========================================
-
 // Get Memories
-app.get('/api/memories', authenticateToken, async (req, res) => {
+app.get('/api/memories', async (req, res) => {
   try {
-    if (!req.user.coupleId) return res.status(400).json({ error: 'No couple space' });
+    const roomId = req.query.roomId || req.headers['x-room-id'];
+    if (!roomId) return res.json([]);
+    const couple = await getCoupleByRoomId(roomId);
+    if (!couple) return res.json([]);
+
     const memories = await prisma.memory.findMany({
-      where: { coupleId: req.user.coupleId },
-      orderBy: { memoryDate: 'desc' },
-      include: { uploadedBy: { select: { username: true } } }
+      where: { coupleId: couple.id },
+      orderBy: { memoryDate: 'desc' }
     });
     res.json(memories);
   } catch (err) {
@@ -673,23 +338,24 @@ app.get('/api/memories', authenticateToken, async (req, res) => {
 });
 
 // Create Memory
-app.post('/api/memories', authenticateToken, async (req, res) => {
+app.post('/api/memories', async (req, res) => {
   try {
-    const { mediaUrl, mediaType = 'IMAGE', caption, memoryDate } = req.body;
-    if (!mediaUrl) return res.status(400).json({ error: 'Media URL is required' });
+    const { roomId, mediaUrl, mediaType = 'IMAGE', caption, memoryDate } = req.body;
+    const roomCode = roomId || req.headers['x-room-id'];
+    if (!mediaUrl || !roomCode) return res.status(400).json({ error: 'Media URL and roomId are required' });
 
+    const couple = await getCoupleByRoomId(roomCode);
     const memory = await prisma.memory.create({
       data: {
-        coupleId: req.user.coupleId,
-        uploadedById: req.user.userId,
+        coupleId: couple.id,
         mediaUrl,
         mediaType,
         caption,
         memoryDate: memoryDate ? new Date(memoryDate) : new Date()
-      },
-      include: { uploadedBy: { select: { username: true } } }
+      }
     });
 
+    io.to(roomCode).emit('memories_updated', memory);
     res.json(memory);
   } catch (err) {
     res.status(500).json({ error: 'Failed to save memory' });

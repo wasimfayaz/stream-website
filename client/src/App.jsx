@@ -28,7 +28,6 @@ import {
   HeartHandshake,
   History
 } from 'lucide-react';
-import AuthModal from './components/AuthModal';
 import WatchlistSection from './components/WatchlistSection';
 import MemoriesSection from './components/MemoriesSection';
 import HistorySection from './components/HistorySection';
@@ -98,62 +97,62 @@ const FLIRTY_QUOTES = [
 ];
 
 function App() {
-  // Auth & Couple Space States
-  const [currentUser, setCurrentUser] = useState(null);
-  const [authLoading, setAuthLoading] = useState(true);
-
-  // Lobby States
+  // Room & Lobby States
+  const [username, setUsername] = useState(() => localStorage.getItem('streaam_username') || 'Wasim');
   const [roomIdInput, setRoomIdInput] = useState('');
-  const [username, setUsername] = useState(() => localStorage.getItem('streaam_username') || '');
+  const [roomId, setRoomId] = useState(() => localStorage.getItem('streaam_room_id') || '');
   const [joinedRoom, setJoinedRoom] = useState(false);
-  const [roomId, setRoomId] = useState('');
 
-  // Verify Auth session on load
+  // Check URL query parameters & localStorage on load
   useEffect(() => {
-    const token = localStorage.getItem('streaam_token');
-    if (!token) {
-      setAuthLoading(false);
-      return;
+    const params = new URLSearchParams(window.location.search);
+    const urlRoom = params.get('room');
+
+    const savedUser = localStorage.getItem('streaam_username');
+    const savedRoom = urlRoom || localStorage.getItem('streaam_room_id');
+
+    if (urlRoom) {
+      setRoomIdInput(urlRoom);
+      setRoomId(urlRoom);
+    } else if (savedRoom) {
+      setRoomIdInput(savedRoom);
+      setRoomId(savedRoom);
     }
 
-    fetch(`${API_BASE}/api/auth/me`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-      .then(res => res.json())
-      .then(user => {
-        if (user && user.id) {
-          setCurrentUser(user);
-          if (user.username) setUsername(user.username);
-          if (user.couple && user.couple.inviteCode) {
-            setRoomId(user.couple.inviteCode);
-            setJoinedRoom(true);
-          }
-        } else {
-          localStorage.removeItem('streaam_token');
-        }
-      })
-      .catch(err => {
-        console.error('Auth verification error:', err);
-      })
-      .finally(() => setAuthLoading(false));
-  }, []);
+    if (savedUser) {
+      setUsername(savedUser);
+    }
 
-  const handleAuthSuccess = (user) => {
-    setCurrentUser(user);
-    if (user.username) setUsername(user.username);
-    if (user.couple && user.couple.inviteCode) {
-      setRoomId(user.couple.inviteCode);
+    if (savedRoom && (savedUser || urlRoom)) {
       setJoinedRoom(true);
     }
+  }, []);
+
+  const handleEnterRoom = (e) => {
+    if (e) e.preventDefault();
+    const finalName = username.trim() || 'Wasim';
+    const finalRoom = (roomIdInput || roomId || 'LOVE-ROOM').trim().toUpperCase();
+
+    setUsername(finalName);
+    setRoomId(finalRoom);
+    localStorage.setItem('streaam_username', finalName);
+    localStorage.setItem('streaam_room_id', finalRoom);
+    setJoinedRoom(true);
   };
 
-  // Fetch Persistent Chat History when currentUser is authenticated
+  const handleGenerateRoom = () => {
+    const randomCode = 'LOVE-' + Math.random().toString(36).substring(2, 7).toUpperCase();
+    setRoomIdInput(randomCode);
+  };
+
+  const handleLeaveRoom = () => {
+    setJoinedRoom(false);
+  };
+
+  // Fetch Persistent Chat History when room is joined
   useEffect(() => {
-    if (currentUser && currentUser.coupleId) {
-      const token = localStorage.getItem('streaam_token');
-      fetch(`${API_BASE}/api/chat`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
+    if (joinedRoom && roomId) {
+      fetch(`${API_BASE}/api/chat?roomId=${encodeURIComponent(roomId)}`)
         .then(res => res.json())
         .then(dbMsgs => {
           if (Array.isArray(dbMsgs) && dbMsgs.length > 0) {
@@ -162,14 +161,7 @@ function App() {
         })
         .catch(err => console.error('Failed to load chat history:', err));
     }
-  }, [currentUser]);
-
-  const handleLogout = () => {
-    localStorage.removeItem('streaam_token');
-    setCurrentUser(null);
-    setJoinedRoom(false);
-    window.location.reload();
-  };
+  }, [joinedRoom, roomId]);
 
   // App States
   const [socket, setSocket] = useState(null);
@@ -1006,13 +998,65 @@ function App() {
 
   return (
     <>
-      {(!currentUser || !currentUser.coupleId) && !authLoading && (
-        <AuthModal onAuthSuccess={handleAuthSuccess} initialUser={currentUser} />
+      {!joinedRoom && (
+        <div className="auth-overlay">
+          <div className="auth-card" style={{ maxWidth: '440px' }}>
+            <div className="auth-header">
+              <div className="auth-icon" style={{ background: 'rgba(255, 75, 110, 0.15)', color: 'var(--primary)' }}>
+                <Film size={28} />
+              </div>
+              <h2>Streaam Sync Room 🍿</h2>
+              <p>Stream movies & videos in real-time sync with your partner!</p>
+            </div>
+
+            <form onSubmit={handleEnterRoom} className="auth-form">
+              <div className="form-group">
+                <label className="form-label">Your Name</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="e.g. Wasim or Edilyn"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Room Code</label>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="e.g. OUR-THEATER"
+                    value={roomIdInput}
+                    onChange={(e) => setRoomIdInput(e.target.value.toUpperCase())}
+                    required
+                    style={{ textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleGenerateRoom}
+                    className="btn-secondary"
+                    style={{ padding: '0.6rem 0.85rem', whiteSpace: 'nowrap', fontSize: '0.8rem' }}
+                    title="Generate new room code"
+                  >
+                    <RefreshCw size={14} /> New
+                  </button>
+                </div>
+              </div>
+
+              <button type="submit" className="auth-submit-btn">
+                Enter Watch Party Room 🎬
+              </button>
+            </form>
+          </div>
+        </div>
       )}
 
       <header className="floating-pill-header">
         <div className="header-nav-row">
-          <a href="/" className="header-brand" onClick={(e) => { e.preventDefault(); leaveRoom(); }}>
+          <a href="/" className="header-brand" onClick={(e) => { e.preventDefault(); handleLeaveRoom(); }}>
             <span>M</span>
           </a>
           <div className="pill-nav-links">
@@ -1037,22 +1081,20 @@ function App() {
         </div>
 
         <div className="header-actions-row">
-          {currentUser && (
+          {joinedRoom && (
             <button 
-              onClick={handleLogout} 
+              onClick={handleLeaveRoom} 
               className="btn-leave-room"
               style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}
             >
-              <LogOut size={14} /> Sign Out
+              <LogOut size={14} /> Switch Room
             </button>
           )}
           
           <div className="user-status-pill">
             <div className="status-dot" style={{ backgroundColor: joinedRoom ? 'var(--primary)' : 'var(--text-muted)' }}></div>
             <span>
-              {currentUser?.partner 
-                ? `${currentUser.username} & ${currentUser.partner.username}` 
-                : (currentUser?.username || 'Edilyn & Wasim')}
+              {joinedRoom ? `Room: ${roomId} (${username})` : 'Not in room'}
             </span>
           </div>
         </div>
@@ -1063,14 +1105,12 @@ function App() {
         <div className="mobile-top-left">
           <div className="status-dot" style={{ backgroundColor: joinedRoom ? 'var(--primary)' : 'var(--text-muted)' }}></div>
           <span>
-            {currentUser?.partner 
-              ? `${currentUser.username} & ${currentUser.partner.username}` 
-              : (currentUser?.username || 'Edilyn & Wasim')}
+            {joinedRoom ? `Room: ${roomId}` : 'Not in room'}
           </span>
         </div>
 
         {joinedRoom && (
-          <button className="btn-leave-room" onClick={leaveRoom}>
+          <button className="btn-leave-room" onClick={handleLeaveRoom}>
             <LogOut size={12} /> Leave
           </button>
         )}
