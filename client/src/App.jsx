@@ -118,7 +118,9 @@ function App() {
       const newSocket = io(SOCKET_URL);
       setSocket(newSocket);
 
-      newSocket.emit('join_room', { roomId, username });
+      newSocket.on('connect', () => {
+        newSocket.emit('join_room', { roomId, username });
+      });
 
       newSocket.on('room_state', (state) => {
         setUsers(state.users);

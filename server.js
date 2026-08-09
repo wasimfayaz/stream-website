@@ -54,30 +54,40 @@ io.on('connection', (socket) => {
     }
     
     const room = rooms[roomId];
-    // Add user if not already in list
-    if (!room.users.some(u => u.id === socket.id)) {
-      room.users.push({ id: socket.id, username });
+    
+    // Check if user was already in the room under a different socket ID (reconnection)
+    const existingUserIndex = room.users.findIndex(u => u.username === username);
+    let isReconnect = false;
+    
+    if (existingUserIndex !== -1) {
+      room.users[existingUserIndex].id = socket.id;
+      isReconnect = true;
+    } else {
+      if (!room.users.some(u => u.id === socket.id)) {
+        room.users.push({ id: socket.id, username });
+      }
     }
     
     // Send current state
     socket.emit('room_state', room);
     
-    // Broadcast user joined
-    socket.to(roomId).emit('user_joined', { id: socket.id, username, users: room.users });
-    
     // Update users list for everyone in the room
     io.to(roomId).emit('users_update', room.users);
     
-    // Send system message
-    const systemMsg = {
-      id: Math.random().toString(36).substr(2, 9),
-      sender: 'System',
-      text: `${username} joined the party!`,
-      timestamp: Date.now(),
-      isSystem: true
-    };
-    room.messages.push(systemMsg);
-    io.to(roomId).emit('receive_message', systemMsg);
+    // Broadcast user joined (only if they aren't reconnecting silently)
+    if (!isReconnect) {
+      socket.to(roomId).emit('user_joined', { id: socket.id, username, users: room.users });
+      
+      const systemMsg = {
+        id: Math.random().toString(36).substr(2, 9),
+        sender: 'System',
+        text: `${username} joined the party!`,
+        timestamp: Date.now(),
+        isSystem: true
+      };
+      room.messages.push(systemMsg);
+      io.to(roomId).emit('receive_message', systemMsg);
+    }
   });
   
   socket.on('send_message', ({ roomId, message }) => {
@@ -166,25 +176,39 @@ io.on('connection', (socket) => {
       const index = room.users.findIndex(u => u.id === socket.id);
       if (index !== -1) {
         const username = room.users[index].username;
-        room.users.splice(index, 1);
         
-        io.to(roomId).emit('users_update', room.users);
-        
-        if (room.users.length === 0) {
-          delete rooms[roomId];
-        } else {
-          io.to(roomId).emit('user_left', { id: socket.id, username });
+        // Wait 4 seconds to see if they reconnect
+        setTimeout(() => {
+          const activeRoom = rooms[roomId];
+          if (!activeRoom) return;
           
-          const systemMsg = {
-            id: Math.random().toString(36).substr(2, 9),
-            sender: 'System',
-            text: `${username} left the party.`,
-            timestamp: Date.now(),
-            isSystem: true
-          };
-          room.messages.push(systemMsg);
-          io.to(roomId).emit('receive_message', systemMsg);
-        }
+          // Verify if they are still connected under any ID (or if they reconnected with a new ID)
+          const currentConnection = activeRoom.users.find(u => u.username === username);
+          
+          // If no connection is found for this username, OR if it matches this disconnected socket.id, they left!
+          if (!currentConnection || currentConnection.id === socket.id) {
+            const cleanIndex = activeRoom.users.findIndex(u => u.username === username);
+            if (cleanIndex !== -1) activeRoom.users.splice(cleanIndex, 1);
+            
+            io.to(roomId).emit('users_update', activeRoom.users);
+            
+            if (activeRoom.users.length === 0) {
+              delete rooms[roomId];
+            } else {
+              io.to(roomId).emit('user_left', { id: socket.id, username });
+              
+              const systemMsg = {
+                id: Math.random().toString(36).substr(2, 9),
+                sender: 'System',
+                text: `${username} left the party.`,
+                timestamp: Date.now(),
+                isSystem: true
+              };
+              activeRoom.messages.push(systemMsg);
+              io.to(roomId).emit('receive_message', systemMsg);
+            }
+          }
+        }, 4000);
       }
     });
   });
