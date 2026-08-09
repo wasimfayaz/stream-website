@@ -3,27 +3,40 @@ import { Film, Calendar, Clock, Star, Heart } from 'lucide-react';
 
 const API_BASE = import.meta.env.DEV ? 'http://localhost:5000' : window.location.origin;
 
-export default function HistorySection() {
+export default function HistorySection({ socket, roomId }) {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchHistory = async () => {
+    try {
+      const token = localStorage.getItem('streaam_token');
+      const res = await fetch(`${API_BASE}/api/watch-history`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (Array.isArray(data)) setHistory(data);
+    } catch (err) {
+      console.error('Failed to fetch history:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        const token = localStorage.getItem('streaam_token');
-        const res = await fetch(`${API_BASE}/api/watch-history`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await res.json();
-        if (Array.isArray(data)) setHistory(data);
-      } catch (err) {
-        console.error('Failed to fetch history:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchHistory();
   }, []);
+
+  useEffect(() => {
+    if (socket) {
+      const handleHistoryUpdate = () => {
+        fetchHistory();
+      };
+      socket.on('history_updated', handleHistoryUpdate);
+      return () => {
+        socket.off('history_updated', handleHistoryUpdate);
+      };
+    }
+  }, [socket]);
 
   const formatDuration = (secs) => {
     if (!secs) return 'N/A';

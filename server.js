@@ -503,8 +503,13 @@ app.post('/api/watch-session/progress', authenticateToken, async (req, res) => {
         lastPosition: currentTime,
         duration: duration || undefined,
         isCompleted: isCompleted || false
-      }
+      },
+      include: { couple: true }
     });
+
+    if (session.couple?.inviteCode) {
+      io.to(session.couple.inviteCode).emit('history_updated');
+    }
 
     res.json({ success: true, session });
   } catch (err) {
@@ -631,11 +636,19 @@ app.post('/api/ratings', authenticateToken, async (req, res) => {
         stars: parseInt(stars),
         review
       },
-      include: { user: { select: { username: true } } }
+      include: {
+        user: { select: { username: true } },
+        watchSession: { include: { couple: true } }
+      }
     });
+
+    if (rating.watchSession?.couple?.inviteCode) {
+      io.to(rating.watchSession.couple.inviteCode).emit('history_updated');
+    }
 
     res.json(rating);
   } catch (err) {
+    console.error('Rating save error:', err);
     res.status(500).json({ error: 'Failed to save rating' });
   }
 });
@@ -828,6 +841,7 @@ io.on('connection', (socket) => {
             }
           });
           room.activeSessionId = session.id;
+          io.to(roomId).emit('history_updated');
         }
       } catch (err) {
         console.error('Failed to save watch session:', err);
@@ -884,6 +898,18 @@ io.on('connection', (socket) => {
     if (room) {
       socket.emit('sync_response', room.playback);
     }
+  });
+
+  socket.on('watchlist_update', ({ roomId }) => {
+    socket.to(roomId).emit('watchlist_updated');
+  });
+
+  socket.on('memories_update', ({ roomId }) => {
+    socket.to(roomId).emit('memories_updated');
+  });
+
+  socket.on('history_update', ({ roomId }) => {
+    socket.to(roomId).emit('history_updated');
   });
 
   socket.on('disconnect', () => {

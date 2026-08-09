@@ -3,7 +3,7 @@ import { Plus, Image, Calendar, Heart, Trash2 } from 'lucide-react';
 
 const API_BASE = import.meta.env.DEV ? 'http://localhost:5000' : window.location.origin;
 
-export default function MemoriesSection() {
+export default function MemoriesSection({ socket, roomId }) {
   const [memories, setMemories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -30,6 +30,18 @@ export default function MemoriesSection() {
     fetchMemories();
   }, []);
 
+  useEffect(() => {
+    if (socket) {
+      const handleMemoriesUpdate = () => {
+        fetchMemories();
+      };
+      socket.on('memories_updated', handleMemoriesUpdate);
+      return () => {
+        socket.off('memories_updated', handleMemoriesUpdate);
+      };
+    }
+  }, [socket]);
+
   const handleAddMemory = async (e) => {
     e.preventDefault();
     if (!mediaUrl.trim()) return;
@@ -52,6 +64,10 @@ export default function MemoriesSection() {
       setMediaUrl('');
       setCaption('');
       setShowAddModal(false);
+
+      if (socket && roomId) {
+        socket.emit('memories_update', { roomId });
+      }
     } catch (err) {
       console.error('Failed to save memory:', err);
     }

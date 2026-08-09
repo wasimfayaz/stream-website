@@ -1567,15 +1567,15 @@ function App() {
             )}
 
             {activeTab === 'watchlist' && (
-              <WatchlistSection />
+              <WatchlistSection socket={socket} roomId={roomId} />
             )}
 
             {activeTab === 'history' && (
-              <HistorySection />
+              <HistorySection socket={socket} roomId={roomId} />
             )}
 
             {activeTab === 'memories' && (
-              <MemoriesSection />
+              <MemoriesSection socket={socket} roomId={roomId} />
             )}
           </div>
         </div>

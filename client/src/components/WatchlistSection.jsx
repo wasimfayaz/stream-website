@@ -3,7 +3,7 @@ import { Plus, Trash2, CheckCircle, Clock, Heart, Star } from 'lucide-react';
 
 const API_BASE = import.meta.env.DEV ? 'http://localhost:5000' : window.location.origin;
 
-export default function WatchlistSection({ onSelectMovie }) {
+export default function WatchlistSection({ onSelectMovie, socket, roomId }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -29,6 +29,18 @@ export default function WatchlistSection({ onSelectMovie }) {
     fetchWatchlist();
   }, []);
 
+  useEffect(() => {
+    if (socket) {
+      const handleWatchlistUpdate = () => {
+        fetchWatchlist();
+      };
+      socket.on('watchlist_updated', handleWatchlistUpdate);
+      return () => {
+        socket.off('watchlist_updated', handleWatchlistUpdate);
+      };
+    }
+  }, [socket]);
+
   const handleAddItem = async (e) => {
     e.preventDefault();
     if (!title.trim()) return;
@@ -50,6 +62,10 @@ export default function WatchlistSection({ onSelectMovie }) {
       setTitle('');
       setPosterUrl('');
       setShowAddModal(false);
+
+      if (socket && roomId) {
+        socket.emit('watchlist_update', { roomId });
+      }
     } catch (err) {
       console.error('Failed to add item:', err);
     }
@@ -67,6 +83,10 @@ export default function WatchlistSection({ onSelectMovie }) {
         body: JSON.stringify({ status })
       });
       setItems(items.map(item => item.id === id ? { ...item, status } : item));
+
+      if (socket && roomId) {
+        socket.emit('watchlist_update', { roomId });
+      }
     } catch (err) {
       console.error('Failed to update status:', err);
     }
@@ -80,6 +100,10 @@ export default function WatchlistSection({ onSelectMovie }) {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       setItems(items.filter(item => item.id !== id));
+
+      if (socket && roomId) {
+        socket.emit('watchlist_update', { roomId });
+      }
     } catch (err) {
       console.error('Failed to delete item:', err);
     }
