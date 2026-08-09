@@ -28,22 +28,22 @@ const DEFAULT_MOVIES = [];
 const REACTIONS = ['❤️', '😂', '😮', '🔥', '🍿', '😢'];
 
 const MOVIE_SERVERS = [
-  { id: 'vidsrc_cc', name: 'Server 1 (VidSrc CC - Ultra Fast)', getUrl: (tmdbId) => `https://vidsrc.cc/v2/embed/movie/${tmdbId}` },
-  { id: 'vidsrc_me', name: 'Server 2 (VidSrc ME - Clean HD)', getUrl: (tmdbId) => `https://vidsrc.me/embed/movie/${tmdbId}` },
-  { id: '2embed', name: 'Server 3 (2Embed - Stable)', getUrl: (tmdbId) => `https://www.2embed.cc/embed/${tmdbId}` },
-  { id: 'vidsrc_pm', name: 'Server 4 (VidSrc PM - Fast Mirror)', getUrl: (tmdbId) => `https://vidsrc.pm/embed/movie/${tmdbId}` },
-  { id: 'multiembed', name: 'Server 5 (SuperEmbed - Multi Mirror)', getUrl: (tmdbId) => `https://multiembed.mov/directstream.php?video_id=${tmdbId}&tmdb=1` }
+  { id: 'vidsrc_cc', name: 'Server 1 (VidSrc CC - Ultra Fast)', getUrl: (imdbId) => `https://vidsrc.cc/v2/embed/movie/${imdbId}` },
+  { id: 'vidsrc_me', name: 'Server 2 (VidSrc ME - Clean HD)', getUrl: (imdbId) => `https://vidsrc.me/embed/movie?imdb=${imdbId}` },
+  { id: '2embed', name: 'Server 3 (2Embed - Stable)', getUrl: (imdbId) => `https://www.2embed.cc/embed/${imdbId}` },
+  { id: 'vidsrc_pm', name: 'Server 4 (VidSrc PM - Fast Mirror)', getUrl: (imdbId) => `https://vidsrc.pm/embed/movie?imdb=${imdbId}` },
+  { id: 'multiembed', name: 'Server 5 (SuperEmbed - Multi Mirror)', getUrl: (imdbId) => `https://multiembed.mov/directstream.php?video_id=${imdbId}` }
 ];
 
 const POPULAR_MOVIES = [
-  { id: 597, title: 'Titanic', year: '1997', poster: 'https://image.tmdb.org/t/p/w500/9cqN121KmBkWi828D8RStfiHWTo.jpg', overview: 'A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.' },
-  { id: 11036, title: 'The Notebook', year: '2004', poster: 'https://image.tmdb.org/t/p/w500/rNzQIGRG81KScujVJme2cTSu2.jpg', overview: 'An epic love story centered around an older man who reads aloud to an older woman in a nursing home.' },
-  { id: 313369, title: 'La La Land', year: '2016', poster: 'https://image.tmdb.org/t/p/w500/uDO8zWDhfWwo1ikxsRFAZWVvMxs.jpg', overview: 'While navigating their careers in Los Angeles, a pianist and an actress fall in love while attempting to reconcile their aspirations.' },
-  { id: 27205, title: 'Inception', year: '2010', poster: 'https://image.tmdb.org/t/p/w500/oYuLEW9W2vBBGLBocqZXi12xIQp.jpg', overview: 'A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea.' },
-  { id: 19995, title: 'Avatar', year: '2009', poster: 'https://image.tmdb.org/t/p/w500/kyeqWdyUXW608qlYkRqosgbbJyK.jpg', overview: 'A paraplegic Marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home.' },
-  { id: 157336, title: 'Interstellar', year: '2014', poster: 'https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg', overview: 'The adventures of a group of explorers who make use of a newly discovered wormhole to surpass the limitations on human space travel.' },
-  { id: 299536, title: 'Avengers: Infinity War', year: '2018', poster: 'https://image.tmdb.org/t/p/w500/7WsyChLLEzFiDOVTGfaZaE3zRBV.jpg', overview: 'The Avengers and their allies must be willing to sacrifice all in an attempt to defeat the powerful Thanos.' },
-  { id: 550, title: 'Fight Club', year: '1999', poster: 'https://image.tmdb.org/t/p/w500/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg', overview: 'An insomniac office worker and a devil-may-care soap maker form an underground fight club.' }
+  { id: 'tt0120338', title: 'Titanic', year: '1997', poster: 'https://image.tmdb.org/t/p/w500/9cqN121KmBkWi828D8RStfiHWTo.jpg', overview: 'A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.' },
+  { id: 'tt0332280', title: 'The Notebook', year: '2004', poster: 'https://image.tmdb.org/t/p/w500/rNzQIGRG81KScujVJme2cTSu2.jpg', overview: 'An epic love story centered around an older man who reads aloud to an older woman in a nursing home.' },
+  { id: 'tt3783958', title: 'La La Land', year: '2016', poster: 'https://image.tmdb.org/t/p/w500/uDO8zWDhfWwo1ikxsRFAZWVvMxs.jpg', overview: 'While navigating their careers in Los Angeles, a pianist and an actress fall in love while attempting to reconcile their aspirations.' },
+  { id: 'tt1375666', title: 'Inception', year: '2010', poster: 'https://image.tmdb.org/t/p/w500/oYuLEW9W2vBBGLBocqZXi12xIQp.jpg', overview: 'A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea.' },
+  { id: 'tt0499549', title: 'Avatar', year: '2009', poster: 'https://image.tmdb.org/t/p/w500/kyeqWdyUXW608qlYkRqosgbbJyK.jpg', overview: 'A paraplegic Marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home.' },
+  { id: 'tt0816692', title: 'Interstellar', year: '2014', poster: 'https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg', overview: 'The adventures of a group of explorers who make use of a newly discovered wormhole to surpass the limitations on human space travel.' },
+  { id: 'tt4154756', title: 'Avengers: Infinity War', year: '2018', poster: 'https://image.tmdb.org/t/p/w500/7WsyChLLEzFiDOVTGfaZaE3zRBV.jpg', overview: 'The Avengers and their allies must be willing to sacrifice all in an attempt to defeat the powerful Thanos.' },
+  { id: 'tt0137523', title: 'Fight Club', year: '1999', poster: 'https://image.tmdb.org/t/p/w500/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg', overview: 'An insomniac office worker and a devil-may-care soap maker form an underground fight club.' }
 ];
 
 const FLIRTY_QUOTES = [
@@ -365,16 +365,25 @@ function App() {
     }
   };
 
-  // Free Movie Search API Handler
+  // Free Movie Search API Handler (OMDb API - Bypasses regional blocks)
   const handleMovieSearch = async (e) => {
     if (e) e.preventDefault();
     if (!freeMovieQuery.trim()) return;
     setIsSearchingMovies(true);
     try {
-      const res = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=15d2aea67154377073f90d96b6495adc&query=${encodeURIComponent(freeMovieQuery)}`);
+      const res = await fetch(`https://www.omdbapi.com/?s=${encodeURIComponent(freeMovieQuery)}&apikey=thewdb&type=movie`);
       const data = await res.json();
-      if (data.results) {
-        setFreeSearchResults(data.results.filter(m => m.poster_path));
+      if (data.Search) {
+        // Map OMDb results to our standard format
+        const mappedResults = data.Search.filter(m => m.Poster !== 'N/A').map(m => ({
+          id: m.imdbID,
+          title: m.Title,
+          poster_path: m.Poster,
+          overview: `Released: ${m.Year}`
+        }));
+        setFreeSearchResults(mappedResults);
+      } else {
+        setFreeSearchResults([]);
       }
     } catch (err) {
       console.error('Failed to search movies', err);
@@ -385,12 +394,16 @@ function App() {
 
   const playFreeMovie = (movie, serverId = selectedServer) => {
     const serverObj = MOVIE_SERVERS.find(s => s.id === serverId) || MOVIE_SERVERS[0];
-    const embedUrl = serverObj.getUrl(movie.id);
-    const posterUrl = movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : movie.poster;
+    const embedUrl = serverObj.getUrl(movie.id); // movie.id is now the imdbID
+    
+    // Support absolute URLs (OMDb) and relative paths (TMDB legacy)
+    const posterUrl = movie.poster_path 
+      ? (movie.poster_path.startsWith('http') ? movie.poster_path : `https://image.tmdb.org/t/p/w500${movie.poster_path}`)
+      : movie.poster;
     
     const videoData = {
       id: `free-movie-${movie.id}`,
-      tmdbId: movie.id,
+      imdbId: movie.id,
       title: movie.title,
       url: embedUrl,
       description: movie.overview || `Streaming ${movie.title} on ${serverObj.name}`,
@@ -1163,7 +1176,7 @@ function App() {
                       onClick={() => playFreeMovie(movie)}
                     >
                       <img 
-                        src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : movie.poster} 
+                        src={movie.poster_path ? (movie.poster_path.startsWith('http') ? movie.poster_path : `https://image.tmdb.org/t/p/w500${movie.poster_path}`) : movie.poster} 
                         alt={movie.title} 
                       />
                       <div className="movie-thumbnail-overlay">
