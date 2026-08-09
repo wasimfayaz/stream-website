@@ -755,29 +755,29 @@ function App() {
             Baby<span>Sync</span>
           </div>
         </a>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div className="header-actions">
           <button 
             onClick={triggerFlirt} 
-            className="btn-action-sync" 
+            className="btn-action-sync btn-flirt" 
             style={{ 
               background: 'rgba(14, 165, 233, 0.15)', 
               borderColor: 'rgba(14, 165, 233, 0.3)', 
               color: '#e0f2fe',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
+              gap: '0.4rem',
               animation: 'heartBeat 2.5s infinite'
             }}
           >
             <Heart size={14} fill="var(--primary)" color="var(--primary)" />
-            <span>Flirt with Baby</span>
+            <span className="flirt-btn-text">Flirt with Baby</span>
           </button>
-          <button onClick={leaveRoom} className="btn-action-sync" style={{ background: 'rgba(239, 68, 110, 0.15)', borderColor: 'rgba(239, 68, 110, 0.3)', color: '#fecaca' }}>
-            Leave Room
+          <button onClick={leaveRoom} className="btn-action-sync btn-leave" style={{ background: 'rgba(239, 68, 110, 0.15)', borderColor: 'rgba(239, 68, 110, 0.3)', color: '#fecaca' }}>
+            <span className="leave-btn-text">Leave Room</span>
           </button>
           <div className="user-status-pill">
             <div className="status-dot"></div>
-            <span>Watching as: <strong>{username}</strong></span>
+            <span><span className="watching-prefix">Watching as: </span><strong>{username}</strong></span>
           </div>
         </div>
       </header>

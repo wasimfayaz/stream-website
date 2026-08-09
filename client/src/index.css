@@ -371,6 +371,7 @@ body {
   width: 100%;
   height: 100%;
   display: block;
+  object-fit: contain;
 }
 
 /* CUSTOM VIDEO PLAYER OVERLAY */
@@ -1050,6 +1051,12 @@ body {
   70% { transform: scale(1); }
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 @media (max-width: 1024px) {
   .room-container {
     height: auto;
@@ -1057,13 +1064,105 @@ body {
     flex-direction: column;
     overflow: visible;
   }
+  .main-content {
+    overflow-y: visible;
+    padding: 1.25rem;
+    gap: 1.25rem;
+  }
   .sidebar {
     border-left: none;
     border-top: 1px solid var(--border-light);
-    height: 550px;
+    height: 520px;
     background: #07050a;
   }
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    padding: 0.75rem 1rem;
+  }
+  .brand-name {
+    font-size: 1.2rem;
+  }
+  .brand-icon {
+    padding: 0.35rem;
+    border-radius: 8px;
+  }
+  .header-actions {
+    gap: 0.4rem;
+  }
+  .user-status-pill {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.75rem;
+  }
+  .movie-title-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  .movie-title-row h2 {
+    font-size: 1.25rem;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+  .movie-title-row .btn-action-sync {
+    width: 100%;
+    justify-content: center;
+  }
+  .lobby-hero h1 {
+    font-size: 2.2rem;
+  }
+  .lobby-card {
+    padding: 1.5rem 1.25rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-header {
+    padding: 0.6rem 0.75rem;
+  }
+  .watching-prefix {
+    display: none;
+  }
+  .flirt-btn-text::before {
+    content: "Flirt";
+  }
+  .flirt-btn-text {
+    font-size: 0;
+  }
+  .leave-btn-text::before {
+    content: "Leave";
+  }
+  .leave-btn-text {
+    font-size: 0;
+  }
+  .flirt-btn-text::before, .leave-btn-text::before {
+    font-size: 0.75rem;
+  }
   .main-content {
-    overflow-y: visible;
+    padding: 0.75rem;
+    gap: 1rem;
+  }
+  .movie-info-card, .movie-catalog-section {
+    padding: 1rem;
+  }
+  .custom-controls-overlay {
+    padding: 0.75rem 0.75rem 0.5rem;
+    opacity: 1; /* Keep controls accessible on touch screens */
+  }
+  .controls-row {
+    gap: 0.35rem;
+  }
+  .controls-left, .controls-right {
+    gap: 0.5rem;
+  }
+  .volume-slider {
+    display: none; /* Hide volume slider on mobile touch devices to eliminate horizontal squeezing */
+  }
+  .time-display {
+    font-size: 0.75rem;
+  }
+  .sidebar {
+    height: 440px;
   }
 }
